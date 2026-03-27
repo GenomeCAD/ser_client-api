@@ -2,6 +2,7 @@
 HL7v2 domain models for genomics report forwarding.
 """
 
+from .hl7v2_generator import HL7v2Generator
 from .domain_models import (
     CareTeamData,
     CompositionData,
@@ -16,6 +17,7 @@ from .domain_models import (
 )
 
 __all__ = [
+    "HL7v2Generator",
     "CareTeamData",
     "CompositionData",
     "ConsentData",
