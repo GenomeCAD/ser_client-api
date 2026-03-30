@@ -5,6 +5,7 @@ Transforms business models into HL7v2 format using hl7apy
 
 import base64
 import os
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
@@ -23,6 +24,20 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
+
+
+@dataclass
+class InstitutionConfig:
+    """Sending-institution identifiers for HL7v2 message headers.
+    """
+
+    lab_name: str                    # MSH-3, PID-3/18, PV1, PRT-8
+    lab_finess: str                  # FINESS-ET of the sending lab
+    facility_name: str               # MSH-4, SFT-1
+    facility_finess: str             # FINESS-ET of the facility (MSH-4)
+    facility_finess_ej: str          # FINESS-EJ of the facility (SFT-1)
+    software_name: str               # SFT-3: EHR/software product name
+    software_product_information: str  # SFT-5: software product information
 
 
 class HL7v2Generator:
@@ -77,13 +92,16 @@ class HL7v2Generator:
         },
     }
 
-    def __init__(self, profile_path: str):
+    def __init__(self, profile_path: str, institution: InstitutionConfig):
         """Initialize HL7v2 generator with mandatory GIPCAD profile.
 
         :param profile_path: Path to the compiled GIPCAD ORU_R01 profile directory
         :type profile_path: str
+        :param institution: Sending institution identifiers for HL7v2 message headers
+        :type institution: InstitutionConfig
         """
         self.message_profile = load_message_profile(profile_path)
+        self.institution = institution
 
     def generate(
         self, parsed_report_data: CompositionData, files_directory: str = None
@@ -203,18 +221,18 @@ class HL7v2Generator:
         visit_group.pv1.patient_class = "I"
         visit_group.pv1.admission_type = "C"
         visit_group.pv1.referring_doctor = (
-            f"{membre_lmg}^^^^^^^^GCS LBM SEQOIA SITE BROUSSAIS"
-            "&6750063265&1.2.250.1.71.4.2.2^D^^^EI"
+            f"{membre_lmg}^^^^^^^^{self.institution.lab_name}"
+            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^D^^^EI"
         )
         visit_group.pv1.consulting_doctor = (
-            f"{membre_lmg}^^^^^^^^GCS LBM SEQOIA SITE BROUSSAIS"
-            "&6750063265&1.2.250.1.71.4.2.2^D^^^EI"
+            f"{membre_lmg}^^^^^^^^{self.institution.lab_name}"
+            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^D^^^EI"
         )
         # TODO fix this admit_source, specification was incorrect
         # visit_group.pv1.admit_source = f"{preindication_name}^{preindication_key}^1.2.250.1.710.1.2.10.3^ISO"
         visit_group.pv1.visit_number = (
-            f"{analysis_id}^^^GCS LBM SEQOIA SITE BROUSSAIS"
-            "&6750063265&1.2.250.1.71.4.2.2^VN"
+            f"{analysis_id}^^^{self.institution.lab_name}"
+            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^VN"
         )
         visit_group.pv1.admit_date_time = self._format_to_hl7_timestamp(
             date_prelevement
@@ -224,15 +242,13 @@ class HL7v2Generator:
     def _populate_sft(self, msg: Message) -> None:
         # SFT.1	Software Vendor Organization
         msg.sft.software_vendor_organization = (
-            "GCS SEQOIA^L^^^^ASIP-SANTE-ST&1.2.250.1.71.4.2.2&ISO^FINEJ^^^750059800"
+            f"{self.institution.facility_name}^L^^^^ASIP-SANTE-ST&1.2.250.1.71.4.2.2&ISO^FINEJ^^^{self.institution.facility_finess_ej}"
         )
         # SFT.3	Software Product Name
-        msg.sft.software_product_name = "gleaves"
+        msg.sft.software_product_name = self.institution.software_name
 
         # SFT.5	Software Product Information
-        msg.sft.software_product_information = (
-            "variantannotator^1.2.250.1.710.1.7.3.2.9^1.2.250.1.710.1.2.1"
-        )
+        msg.sft.software_product_information = self.institution.software_product_information
 
     def _populate_msh(self, msg: Message) -> None:
         """Populate MSH segment with all mandatory fields per IHE ILW profile.
@@ -248,10 +264,12 @@ class HL7v2Generator:
 
         # MSH-3: Sending Application
         msg.msh.sending_application = (
-            "GCS LBM SEQOIA SITE BROUSSAIS^6750063265^1.2.250.1.71.4.2.2"
+            f"{self.institution.lab_name}^{self.institution.lab_finess}^1.2.250.1.71.4.2.2"
         )
         # MSH-4: Sending Facility
-        msg.msh.sending_facility = "GCS SEQOIA^5750059800^1.2.250.1.71.4.2.2"
+        msg.msh.sending_facility = (
+            f"{self.institution.facility_name}^{self.institution.facility_finess}^1.2.250.1.71.4.2.2"
+        )
         # MSH-5: Receiving Application
         msg.msh.receiving_application = (
             "GIP COLLECTEUR ANALYSEUR DE DONNEES^313003057000027^1.2.250.1.71.4.2.2"
@@ -320,8 +338,8 @@ class HL7v2Generator:
         patient_group.pid.set_id_pid = str(patient.set_id)
         # PID.3 - Patient Identifier List
         patient_group.pid.patient_identifier_list = (
-            f"{patient.patient_id}^^^GCS LBM SEQOIA SITE BROUSSAIS"
-            f"&6750063265&1.2.250.1.71.4.2.2^PI"
+            f"{patient.patient_id}^^^{self.institution.lab_name}"
+            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^PI"
         )
         # PID.5 - Patient Name
         patient_group.pid.patient_name = (
@@ -333,8 +351,8 @@ class HL7v2Generator:
         patient_group.pid.administrative_sex = patient.sex
         # PID.18 - Patient Account Number
         patient_group.pid.patient_account_number = (
-            f"{report_id}^^^GCS LBM SEQOIA SITE BROUSSAIS"
-            f"&6750063265&1.2.250.1.71.4.2.2^AN"
+            f"{report_id}^^^{self.institution.lab_name}"
+            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^AN"
         )
         # PID.24 - Multiple Birth Indicator
         patient_group.pid.multiple_birth_indicator = "Y"
@@ -661,9 +679,9 @@ class HL7v2Generator:
             # PRT-7: Organization Unit Type (CWE) - Empty per specs
             # Intentionally left empty
 
-            # PRT-8: Organization (XON) - Fixed hardcoded values per Excel specs
+            # PRT-8: Organization (XON) - Sending institution
             observation_group.prt.participation_organization = (
-                "GCS LBM SEQOIA SITE BROUSSAIS^^^^^6750063265&1.2.250.1.71.4.2.2"
+                f"{self.institution.lab_name}^^^^^{self.institution.lab_finess}&1.2.250.1.71.4.2.2"
             )
 
             # PRT-9: Location (PL) - Empty per specs
