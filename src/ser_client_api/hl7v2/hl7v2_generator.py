@@ -38,6 +38,8 @@ class InstitutionConfig:
     facility_finess_ej: str          # FINESS-EJ of the facility (SFT-1)
     software_name: str               # SFT-3: EHR/software product name
     software_product_information: str  # SFT-5: software product information
+    receiving_application: str       # MSH-5: target CAD receiving application
+    receiving_facility: str          # MSH-6: target CAD receiving facility
 
 
 class HL7v2Generator:
@@ -271,13 +273,9 @@ class HL7v2Generator:
             f"{self.institution.facility_name}^{self.institution.facility_finess}^1.2.250.1.71.4.2.2"
         )
         # MSH-5: Receiving Application
-        msg.msh.receiving_application = (
-            "GIP COLLECTEUR ANALYSEUR DE DONNEES^313003057000027^1.2.250.1.71.4.2.2"
-        )
+        msg.msh.receiving_application = self.institution.receiving_application
         # MSH-6: Receiving Facility
-        msg.msh.receiving_facility = (
-            "GIP COLLECTEUR ANALYSEUR DE DONNEES^2130030570^1.2.250.1.71.4.2.2"
-        )
+        msg.msh.receiving_facility = self.institution.receiving_facility
 
         # MSH-7: Date/Time of Message
         # Format now datetime as HL7v2 timestamp (YYYYMMDDHHMMSS.mmm+ZZZZ)
