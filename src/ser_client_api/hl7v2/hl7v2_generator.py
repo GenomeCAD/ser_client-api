@@ -5,6 +5,7 @@ Transforms business models into HL7v2 format using hl7apy
 
 import base64
 import os
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
@@ -25,6 +26,9 @@ from ser_client_api.hl7v2.domain_models import (
     RelatedPersonData,
 )
 
+# GIP-CPS OID for "type_identifiant_structure"
+OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
+
 
 @dataclass
 class InstitutionConfig:
@@ -38,6 +42,10 @@ class InstitutionConfig:
     facility_finess_ej: str          # FINESS-EJ of the facility (SFT-1)
     software_name: str               # SFT-3: EHR/software product name
     software_product_information: str  # SFT-5: software product information
+    receiving_application: str       # MSH-5: target CAD receiving application
+    receiving_facility: str          # MSH-6: target CAD receiving facility
+    message_profile_name: str        # MSH-21: human-readable profile label (e.g. "Message au format CAD ORU_R01 v1")
+    message_profile_oid: str         # MSH-21: profile version OID (e.g. "1.2.250.1.710.1.15.9.1.1.1")
 
 
 class HL7v2Generator:
@@ -222,17 +230,17 @@ class HL7v2Generator:
         visit_group.pv1.admission_type = "C"
         visit_group.pv1.referring_doctor = (
             f"{membre_lmg}^^^^^^^^{self.institution.lab_name}"
-            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^D^^^EI"
+            f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^D^^^EI"
         )
         visit_group.pv1.consulting_doctor = (
             f"{membre_lmg}^^^^^^^^{self.institution.lab_name}"
-            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^D^^^EI"
+            f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^D^^^EI"
         )
         # TODO fix this admit_source, specification was incorrect
         # visit_group.pv1.admit_source = f"{preindication_name}^{preindication_key}^1.2.250.1.710.1.2.10.3^ISO"
         visit_group.pv1.visit_number = (
             f"{analysis_id}^^^{self.institution.lab_name}"
-            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^VN"
+            f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^VN"
         )
         visit_group.pv1.admit_date_time = self._format_to_hl7_timestamp(
             date_prelevement
@@ -242,7 +250,7 @@ class HL7v2Generator:
     def _populate_sft(self, msg: Message) -> None:
         # SFT.1	Software Vendor Organization
         msg.sft.software_vendor_organization = (
-            f"{self.institution.facility_name}^L^^^^ASIP-SANTE-ST&1.2.250.1.71.4.2.2&ISO^FINEJ^^^{self.institution.facility_finess_ej}"
+            f"{self.institution.facility_name}^L^^^^ASIP-SANTE-ST&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}&ISO^FINEJ^^^{self.institution.facility_finess_ej}"
         )
         # SFT.3	Software Product Name
         msg.sft.software_product_name = self.institution.software_name
@@ -264,20 +272,16 @@ class HL7v2Generator:
 
         # MSH-3: Sending Application
         msg.msh.sending_application = (
-            f"{self.institution.lab_name}^{self.institution.lab_finess}^1.2.250.1.71.4.2.2"
+            f"{self.institution.lab_name}^{self.institution.lab_finess}^{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}"
         )
         # MSH-4: Sending Facility
         msg.msh.sending_facility = (
-            f"{self.institution.facility_name}^{self.institution.facility_finess}^1.2.250.1.71.4.2.2"
+            f"{self.institution.facility_name}^{self.institution.facility_finess}^{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}"
         )
         # MSH-5: Receiving Application
-        msg.msh.receiving_application = (
-            "GIP COLLECTEUR ANALYSEUR DE DONNEES^313003057000027^1.2.250.1.71.4.2.2"
-        )
+        msg.msh.receiving_application = self.institution.receiving_application
         # MSH-6: Receiving Facility
-        msg.msh.receiving_facility = (
-            "GIP COLLECTEUR ANALYSEUR DE DONNEES^2130030570^1.2.250.1.71.4.2.2"
-        )
+        msg.msh.receiving_facility = self.institution.receiving_facility
 
         # MSH-7: Date/Time of Message
         # Format now datetime as HL7v2 timestamp (YYYYMMDDHHMMSS.mmm+ZZZZ)
@@ -288,7 +292,7 @@ class HL7v2Generator:
         # MSH-9: Message Type
         msg.msh.message_type = "ORU^R01^ORU_R01"
         # MSH-10: Message Control ID
-        msg.msh.message_control_id = "6d91642f-40ee-4f8e-afc3-3526101ad1e4"
+        msg.msh.message_control_id = str(uuid.uuid4())
         # MSH-11: Processing ID
         msg.msh.processing_id = "P"
 
@@ -307,7 +311,11 @@ class HL7v2Generator:
         msg.msh.country_code = "FRA"
         msg.msh.character_set = "UNICODE UTF-8"
         msg.msh.principal_language_of_message = "fr^français^ISO6391^FR^France^ISO3166"
-        msg.msh.message_profile_identifier = "Message au format CAD ORU_R01 v1^1.2.250.1.710.1.15.9.1.1.1^1.2.250.1.71.4.2.2^ISO"
+        msg.msh.message_profile_identifier = (
+            f"{self.institution.message_profile_name}"
+            f"^{self.institution.message_profile_oid}"
+            f"^1.2.250.1.710.1.2.1^ISO"
+        )
 
     def _populate_pid(self, msg: Message, patient: PatientData, report_id: str) -> None:
         """Populate PID segment conforming to oru_r01_lab36.xml profile constraints.
@@ -339,7 +347,7 @@ class HL7v2Generator:
         # PID.3 - Patient Identifier List
         patient_group.pid.patient_identifier_list = (
             f"{patient.patient_id}^^^{self.institution.lab_name}"
-            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^PI"
+            f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^PI"
         )
         # PID.5 - Patient Name
         patient_group.pid.patient_name = (
@@ -352,7 +360,7 @@ class HL7v2Generator:
         # PID.18 - Patient Account Number
         patient_group.pid.patient_account_number = (
             f"{report_id}^^^{self.institution.lab_name}"
-            f"&{self.institution.lab_finess}&1.2.250.1.71.4.2.2^AN"
+            f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^AN"
         )
         # PID.24 - Multiple Birth Indicator
         patient_group.pid.multiple_birth_indicator = "Y"
@@ -681,7 +689,7 @@ class HL7v2Generator:
 
             # PRT-8: Organization (XON) - Sending institution
             observation_group.prt.participation_organization = (
-                f"{self.institution.lab_name}^^^^^{self.institution.lab_finess}&1.2.250.1.71.4.2.2"
+                f"{self.institution.lab_name}^^^^^{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}"
             )
 
             # PRT-9: Location (PL) - Empty per specs
