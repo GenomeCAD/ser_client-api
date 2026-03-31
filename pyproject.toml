@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ser-client-api"
-version = "0.1.0"
+version = "0.2.0"
 description = "Core genomics domain models for CAD forwarding connectors"
 readme = "README.md"
 license = {file = "LICENSE"}
