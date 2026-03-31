@@ -26,5 +26,11 @@ dev = [
     "pytest-cov",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = [
+    "src/ser_client_api/**/*.py",
+    "src/ser_client_api/hl7v2/profiles/**",
+]
+
 [project.urls]
 Repository = "https://github.com/GenomeCAD/ser-client-api"

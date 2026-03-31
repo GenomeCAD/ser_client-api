@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HL7v2xConformanceProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="HL7MessageProfileSchema.xsd" HL7Version="2.5.1.ILW.FR.CAD" ProfileType="Constrainable">
+  <MetaData Name="ILW" OrgName="IHE" Version="2.1" Status="DRAFT" Topics="confsig-IHE-2.5.1-profile-accNE_accAL-Deferred" />
+  <ImpNote>Unsolicited transmission of an observation message</ImpNote>
+  <UseCase />
+  <Encodings>
+    <Encoding>ER7</Encoding>
+  </Encodings>
+  <DynamicDef AccAck="NE" AppAck="AL" MsgAckMode="Deferred" />
+  <HL7v2xStaticDef MsgType="ACK" EventType="R01" MsgStructID="ACK" EventDesc="Simple general acknowledgment of Unsolicited transmission of an observation message" Role="Sender">
+    <MetaData Name="ILW" OrgName="IHE" Version="2.1" Status="DRAFT" Topics="confsig-IHE-2.5.1-static-ORU-R01-null-ORU_R01-2.1-DRAFT-Sender" />
+    <Segment Name="MSH" LongName="Message Header" Usage="R" Min="1" Max="1">
+      <ImpNote>Note that the overriding of IHE Laboratory Profile constraints is only allowed in
+        national extensions to this framework</ImpNote>
+      <Field Name="Field Separator" Usage="R" Min="1" Max="1" Datatype="ST" Length="1">
+        <Reference>2.15.9.1</Reference>
+        <DataValues ExValue="|" />
+      </Field>
+      <Field Name="Encoding Characters" Usage="R" Min="1" Max="1" Datatype="ST" Length="4">
+        <Reference>2.15.9.2</Reference>
+      </Field>
+      <!-- FDE : Datatype="ST" Length="199" -->
+      <Field Name="Sending Application" Usage="R" Min="1" Max="1" Datatype="HD" Length="404" Table="0361">
+        <Component Usage="R" Table="0300" Name="namespace ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+      </Field>
+      <!-- FDE : Datatype="ST" Length="199" -->
+      <Field Name="Sending Facility" Usage="R" Min="1" Max="1" Datatype="HD" Length="227" Table="0362">
+        <Component Usage="R" Table="0300" Name="namespace ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+      </Field>
+      <!-- FDE : Datatype="ST" Length="199" -->
+      <Field Name="Receiving Application" Usage="R" Min="1" Max="1" Datatype="HD" Length="227" Table="0361">
+        <Component Usage="R" Table="0300" Name="namespace ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+      </Field>
+      <!-- FDE : Datatype="ST" Length="199" -->
+      <Field Name="Receiving Facility" Usage="R" Min="1" Max="1" Datatype="HD" Length="227" Table="0362">
+        <Component Usage="R" Table="0300" Name="namespace ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+      </Field>
+      <Field Name="Date/Time Of Message" Usage="R" Min="1" Max="1" Datatype="TS" Length="26">
+        <Reference>2.15.9.7</Reference>
+        <Component Name="time" Usage="R" Datatype="DTM" Length="24" />
+        <Component Name="degree of precision" Usage="X" Datatype="ST" Length="1" Table="0529">
+          <ImpNote>Retained for backward compatibility only</ImpNote>
+        </Component>
+      </Field>
+      <Field Name="Security" Usage="X" Min="0" Max="*" Datatype="ST" Length="40">
+        <Reference>2.15.9.8</Reference>
+      </Field>
+      <Field Name="Message Type" Usage="R" Min="1" Max="1" Datatype="MSG" Length="15">
+        <ImpNote>Its content is defined within each transaction-specific section of this document</ImpNote>
+        <Reference>2.15.9.9</Reference>
+        <Component Name="message code" Usage="R" Datatype="ID" Length="3" Table="0076" />
+        <Component Name="trigger event" Usage="R" Datatype="ID" Length="3" Table="0003" />
+        <Component Name="message structure" Usage="R" Datatype="ID" Length="7" Table="0354" />
+      </Field>
+      <!-- FDE: MSH.10 Length 20 -> 199 -->
+      <Field Name="Message Control ID" Usage="R" Min="1" Max="1" Datatype="ST" Length="199">
+        <ImpNote>This field contains a number or other identifier that uniquely identifies the
+          message. Each message should be given a unique identifier by the sending system. The
+          receiving system will echo this ID back to the ending system in the Message Acknowledgment
+          segment (MSA).</ImpNote>
+        <Reference>2.15.8.2</Reference>
+      </Field>
+      <Field Name="Processing ID" Usage="R" Min="1" Max="1" Datatype="PT" Length="3">
+        <Reference>2.15.9.11</Reference>
+        <Component Name="processing ID" Usage="R" Datatype="ID" Length="1" Table="0103" />
+        <Component Name="processing mode" Usage="O" Datatype="ID" Length="1" Table="0207" />
+      </Field>
+      <Field Name="Version ID" Usage="R" Min="1" Max="1" Datatype="VID" Length="971">
+        <Reference>2.15.9.12</Reference>
+        <Component Name="version ID" Usage="R" Datatype="ID" Length="5" Table="0104" />
+        <Component Name="internationalization code" Usage="O" Datatype="CE" Length="483" Table="0399">
+          <SubComponent Name="identifier" Usage="O" Datatype="ST" Length="20" />
+          <SubComponent Name="text" Usage="O" Datatype="ST" Length="199" />
+          <SubComponent Name="name of coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+          <SubComponent Name="alternate identifier" Usage="O" Datatype="ST" Length="20" />
+          <SubComponent Name="alternate text" Usage="O" Datatype="ST" Length="199" />
+          <SubComponent Name="name of alternate coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+        </Component>
+        <Component Name="international version ID" Usage="O" Datatype="CE" Length="483">
+          <SubComponent Name="identifier" Usage="O" Datatype="ST" Length="20" />
+          <SubComponent Name="text" Usage="O" Datatype="ST" Length="199" />
+          <SubComponent Name="name of coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+          <SubComponent Name="alternate identifier" Usage="O" Datatype="ST" Length="20" />
+          <SubComponent Name="alternate text" Usage="O" Datatype="ST" Length="199" />
+          <SubComponent Name="name of alternate coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+        </Component>
+      </Field>
+      <Field Name="Sequence Number" Usage="O" Min="0" Max="1" Datatype="NM" Length="15">
+        <Reference>2.15.9.13</Reference>
+      </Field>
+      <Field Name="Continuation Pointer" Usage="X" Min="0" Max="*" Datatype="ST" Length="180">
+        <Reference>2.15.4.1</Reference>
+      </Field>
+      <!-- FDE : Usage="X" => Usage="O" -->
+      <Field Name="Accept Acknowledgment Type" Usage="O" Min="0" Max="*" Datatype="ID" Length="2" Table="0155">
+        <ImpNote>IHE uses only the HL7 original acknowledgement mode.</ImpNote>
+        <Reference>2.15.9.15</Reference>
+      </Field>
+      <!-- FDE : Usage="X" => Usage="O" -->
+      <Field Name="Application Acknowledgment Type" Usage="O" Min="0" Max="*" Datatype="ID" Length="2" Table="0155">
+        <ImpNote>IHE uses only the HL7 original acknowledgement mode.</ImpNote>
+        <Reference>2.15.9.16</Reference>
+      </Field>
+      <Field Name="Country Code" Usage="RE" Min="0" Max="1" Datatype="ID" Length="3" Table="0399">
+        <Reference>2.15.9.17</Reference>
+      </Field>
+      <Field Name="Character Set" Usage="C" Min="0" Max="1" Datatype="ID" Length="16" Table="0211">
+        <ImpNote>ASCII: The printable 7-bit ASCII character set. 8859/1: The printable characters
+          from the ISO 8859/1 Character set used by Western Europe. This character set can still be
+          used, but 8859/15 should be used by preference. This character set is the
+          forward-compatible version of 8859/1 and includes new characters such as the Euro currency
+          symbol. ISO IR87: Code for the Japanese Graphic Character set for information interchange
+          (JIS X 0208-1990).</ImpNote>
+        <Reference>2.15.9.18</Reference>
+        <DataValues ExValue="ASCII" />
+      </Field>
+      <Field Name="Principal Language Of Message" Usage="RE" Min="0" Max="1" Datatype="CE" Length="478">
+        <Reference>2.15.9.19</Reference>
+        <Component Name="identifier" Usage="RE" Datatype="ST" Length="20" />
+        <Component Name="text" Usage="O" Datatype="ST" Length="199" />
+        <Component Name="name of coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+        <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="20" />
+        <Component Name="alternate text" Usage="O" Datatype="ST" Length="199" />
+        <Component Name="name of alternate coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+      </Field>
+      <Field Name="Alternate Character Set Handling Scheme" Usage="X" Min="0" Max="*" Datatype="ID" Length="20" Table="0356">
+        <Reference>2.15.9.20</Reference>
+      </Field>
+      <Field Name="Message Profile Identifier" Usage="RE" Min="0" Max="*" Datatype="EI" Length="424">
+        <ImpNote>Note that the overriding of IHE Laboratory Profile constraints is only allowed in
+          national extensions to this framework</ImpNote>
+        <Reference>2.15.9.21</Reference>
+        <!-- Datatype="ST" Length="199" -->
+        <Component Name="entity identifier" Usage="R" Datatype="ST" Length="199" />
+        <Component Name="namespace ID" Usage="C" Datatype="ST" Length="199" Table="0363" />
+        <Component Name="universal ID" Usage="C" Datatype="ST" Length="199" />
+        <Component Name="universal ID type" Usage="C" Datatype="ID" Length="6" Table="0301" />
+      </Field>
+    </Segment>
+    <!-- end of MSH -->
+    <Segment Name="SFT" LongName="Software Segment" Usage="RE" Min="0" Max="*">
+      <Field Name="Software Vendor Organization" Usage="R" Min="1" Max="1" Datatype="XON" Length="567" ItemNo="01834">
+        <Reference>2.15.12.1</Reference>
+        <Component Name="organization name" Usage="R" Datatype="ST" Length="50" />
+        <Component Name="organization name type code" Usage="O" Datatype="IS" Length="20" Table="0204" />
+        <Component Name="ID number" Usage="X" Datatype="NM" Length="4" />
+        <Component Name="check digit" Usage="O" Datatype="NM" Length="1" />
+        <Component Name="check digit scheme" Usage="O" Datatype="ID" Length="3" Table="0061" />
+        <Component Name="assigning authority" Usage="O" Datatype="HD" Length="227" Table="0363">
+          <SubComponent Usage="R" Table="0300" Name="namespace ID" Datatype="IS" Length="20" />
+          <SubComponent Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+          <SubComponent Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+        </Component>
+        <Component Datatype="ID" Name="identifier type code" Usage="O" Length="5" Table="0203" />
+        <Component Name="assigning facility ID" Usage="O" Datatype="HD" Length="227">
+          <SubComponent Usage="R" Name="namespace ID" Datatype="IS" Length="20" Table="0300" />
+          <SubComponent Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+          <SubComponent Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+        </Component>
+        <Component Name="name eepresentation code" Usage="O" Datatype="ID" Length="1" Table="0465" />
+        <Component Name="organization identifier" Usage="O" Datatype="ST" Length="20" />
+      </Field>
+      <Field Name="Software Certified Version or Release Number" Usage="R" Min="1" Max="1" Datatype="ST" Length="15" ItemNo="01835">
+        <Reference>2.15.12.2</Reference>
+      </Field>
+      <Field Name="Software Product Name" Usage="R" Min="1" Max="1" Datatype="ST" Length="20" ItemNo="01836">
+        <Reference>2.15.12.3</Reference>
+      </Field>
+      <Field Name="Software Binary ID" Usage="R" Min="1" Max="1" Datatype="ST" Length="20" ItemNo="01837">
+        <Reference>2.15.12.4</Reference>
+      </Field>
+      <!-- SFT.5 -->
+      <!-- FDE: TX -> HD -->
+      <Field Name="Software Product Information" Usage="O" Min="0" Max="1" Datatype="HD" Length="1024" ItemNo="01838">
+        <Reference>2.15.12.5</Reference>
+        <Component Usage="R" Table="0300" Name="namespace ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID" Datatype="ST" Length="199" />
+        <Component Usage="C" Name="universal ID type" Datatype="ID" Length="6" Table="0301" />
+      </Field>
+      <Field Name="Software Install Date" Usage="O" Min="0" Max="1" Datatype="TS" Length="26" ItemNo="01839">
+        <Reference>2.15.12.6</Reference>
+        <Component Name="time" Usage="R" Datatype="DTM" Length="24" />
+        <Component Name="degree of precision" Usage="X" Datatype="ST" Length="1" Table="0529">
+          <ImpNote>Retained for backward compatibility only</ImpNote>
+        </Component>
+      </Field>
+    </Segment>
+    <!-- end of SFT -->
+    <Segment Name="MSA" LongName="Message Acknowledgment" Usage="R" Min="1" Max="1">
+      <Field Name="acknowledgment code" Datatype="ID" Length="-1" Min="1" Max="1" Table="0008" Usage="R"/>
+      <Field Name="message control ID" Datatype="ST" Length="-1" Min="1" Max="1" Usage="R"/>
+      <Field Name="text message" Datatype="ST" Length="-1" Min="0" Max="1" Usage="O"/>
+      <Field Name="expected sequence number" Datatype="NM" Length="-1" Min="0" Max="1" Usage="O"/>
+      <Field Name="delayed acknowledgment type" Datatype="" Length="-1" Min="0" Max="0" Usage="O"/>
+      <Field Name="error condition" Datatype="CE" Length="-1" Min="0" Max="1" Table="0357" Usage="O">
+        <Component Name="identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of coding system" Usage="O" Datatype="ID" Length="-1" Min="0" Max="1" Table="0396"/>
+        <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of alternate coding system" Usage="O" Datatype="ID" Length="-1" Min="0" Max="1" Table="0396"/>
+      </Field>
+    </Segment>
+    <!-- end of MSA -->
+    <Segment Name="ERR" LongName="Error" Usage="RE" Min="0" Max="*">
+      <Field Name="error code and location" Datatype="ELD" Length="-1" Min="0" Max="*" Usage="RE">
+        <Component Name="segment ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="segment sequence" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="field position" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="code identifying error" Usage="O" Datatype="CE" Length="-1" Min="0" Max="1" Table="0357">
+          <SubComponent Name="identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+          <SubComponent Name="text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+          <SubComponent Name="name of coding system" Usage="O" Datatype="ID" Length="-1" Min="0" Max="1" Table="0396"/>
+          <SubComponent Name="alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+          <SubComponent Name="alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+          <SubComponent Name="name of alternate coding system" Usage="O" Datatype="ID" Length="-1" Min="0" Max="1" Table="0396"/>
+        </Component>
+      </Field>
+      <Field Name="error location" Datatype="ERL" Length="-1" Min="0" Max="*" Usage="RE">
+        <Component Name="segment ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="segment sequence" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="field position" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="field repetition" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="component number" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="sub component number" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+      </Field>
+      <Field Name="hl7 error code" Datatype="CWE" Length="-1" Min="1" Max="1" Table="0357" Usage="R">
+        <Component Name="identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="coding system version ID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="original text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of second alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="second alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+      </Field>
+      <Field Name="severity" Datatype="ID" Length="-1" Min="1" Max="1" Table="0516" Usage="R"/>
+      <Field Name="application error code" Datatype="CWE" Length="-1" Min="0" Max="1" Table="0533" Usage="O">
+        <Component Name="identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="coding system version ID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="original text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of second alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="second alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+      </Field>
+      <Field Name="application error parameter" Datatype="ST" Length="-1" Min="0" Max="*" Usage="RE"/>
+      <Field Name="diagnostic information" Datatype="TX" Length="-1" Min="0" Max="1" Usage="O"/>
+      <Field Name="user message" Datatype="TX" Length="-1" Min="0" Max="1" Usage="O"/>
+      <Field Name="inform person indicator" Datatype="IS" Length="-1" Min="0" Max="*" Table="0517" Usage="RE"/>
+      <Field Name="override type" Datatype="CWE" Length="-1" Min="0" Max="1" Table="0518" Usage="O">
+        <Component Name="identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="coding system version ID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="original text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of second alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="second alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+      </Field>
+      <Field Name="override reason code" Datatype="CWE" Length="-1" Min="0" Max="*" Table="0519" Usage="RE">
+        <Component Name="identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="coding system version ID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="original text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate identifier" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="name of second alternate coding system" Usage="C" Datatype="ID" Length="12" Min="0" Max="1" Table="0396"/>
+        <Component Name="second alternate coding system version ID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate coding system OID" Usage="C" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set OID" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="second alternate value set version ID" Usage="C" Datatype="DTM" Length="-1" Min="0" Max="1"/>
+      </Field>
+      <Field Name="help desk contact point" Datatype="XTN" Length="-1" Min="0" Max="*" Usage="RE">
+        <Component Name="telephone number" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="telecommunication use code" Usage="O" Datatype="ID" Length="-1" Min="0" Max="1" Table="0201"/>
+        <Component Name="telecommunication equipment type" Usage="O" Datatype="ID" Length="-1" Min="0" Max="1" Table="0202"/>
+        <Component Name="email address" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="country code" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="area city code" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="local number" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="extension" Usage="O" Datatype="NM" Length="-1" Min="0" Max="1"/>
+        <Component Name="any text" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="extension prefix" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="speed dial code" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+        <Component Name="unformatted telephone number" Usage="O" Datatype="ST" Length="-1" Min="0" Max="1"/>
+      </Field>
+    </Segment>
+    <!-- end of ERR -->
+  </HL7v2xStaticDef>
+</HL7v2xConformanceProfile>
