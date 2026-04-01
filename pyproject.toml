@@ -27,6 +27,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
+packages = ["src/ser_client_api"]
 include = [
     "src/ser_client_api/**/*.py",
     "src/ser_client_api/hl7v2/profiles/**",
