@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from hl7apy.exceptions import HL7apyException
 from hl7apy.parser import parse_message
@@ -175,7 +175,7 @@ def extract_msh10(hl7_content: str) -> str:
     raise ValueError("MSH segment not found or MSH-10 missing in HL7 content")
 
 
-def _validate_msh(ack_msg, expected_uuid: str) -> Tuple[List[str], List[str]]:
+def _validate_msh(ack_msg, expected_uuid: Optional[str] = None) -> Tuple[List[str], List[str]]:
     """Validate MSH fields of the ACK message.
 
     Checks:
@@ -202,21 +202,22 @@ def _validate_msh(ack_msg, expected_uuid: str) -> Tuple[List[str], List[str]]:
     except AttributeError:
         warnings.append("MSH-10 (message control ID) could not be read")
 
-    try:
-        echoed_uuid = ack_msg.msa.msa_2.value.strip() if ack_msg.msa.msa_2 else ""
-        if not echoed_uuid:
-            critical_errors.append("MSA-2 (echoed control ID) is missing or empty")
-        elif echoed_uuid != expected_uuid:
-            critical_errors.append(
-                f"MSA-2 control ID mismatch: expected {expected_uuid!r}, got {echoed_uuid!r}"
-            )
-    except AttributeError:
-        critical_errors.append("MSA-2 (echoed control ID) could not be read")
+    if expected_uuid is not None:
+        try:
+            echoed_uuid = ack_msg.msa.msa_2.value.strip() if ack_msg.msa.msa_2 else ""
+            if not echoed_uuid:
+                critical_errors.append("MSA-2 (echoed control ID) is missing or empty")
+            elif echoed_uuid != expected_uuid:
+                critical_errors.append(
+                    f"MSA-2 control ID mismatch: expected {expected_uuid!r}, got {echoed_uuid!r}"
+                )
+        except AttributeError:
+            critical_errors.append("MSA-2 (echoed control ID) could not be read")
 
     return critical_errors, warnings
 
 
-def _analyze_ack_message(ack_msg, expected_uuid: str) -> AckAnalysisResult:
+def _analyze_ack_message(ack_msg, expected_uuid: Optional[str] = None) -> AckAnalysisResult:
     """Analyze complete ACK message and return structured result"""
     msa_status, message_control_id = _extract_msa_info(ack_msg)
     critical_error_messages, warning_messages, info_messages = _analyze_error_segments(
@@ -235,7 +236,7 @@ def _analyze_ack_message(ack_msg, expected_uuid: str) -> AckAnalysisResult:
     )
 
 
-def process_ack_file_with_hl7apy(ack_filename: str, ack_content: str, profile_path: str, expected_uuid: str) -> int:
+def process_ack_file_with_hl7apy(ack_filename: str, ack_content: str, profile_path: str, expected_uuid: Optional[str] = None) -> int:
     # return system
     try:
         ack_msg = parse_hl7_message_robust(ack_content, profile_path)
