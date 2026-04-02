@@ -572,6 +572,7 @@ class HL7v2Generator:
             files_set = set(files)
 
             for file_ref in files:
+                # Extract filename for format detection (file_ref may include path)
                 filename = os.path.basename(file_ref)
                 if filename.endswith(".sha256"):
                     continue
@@ -581,12 +582,16 @@ class HL7v2Generator:
                 # 1. RP OBX: reference pointer to data file
                 observation_group = order_observation.add_group("ORU_R01_OBSERVATION")
                 obx = observation_group.add_segment("OBX")
+
                 # OBX-1: Individual number (1=patient, 2=father, 3=mother)
                 obx.obx_1 = obx1_value
+
                 # OBX-2: Value Type
                 obx.obx_2 = "RP"
+
                 # OBX-3: Observation Identifier (format code)
                 obx.obx_3 = f"{code}^{description}^{system}"
+
                 # OBX-4: File index within this individual's group
                 obx.obx_4 = str(obx4_index)
                 obx4_index += 1
