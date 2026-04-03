@@ -4,6 +4,7 @@ Transforms business models into HL7v2 format using hl7apy
 """
 
 import base64
+import hashlib
 import os
 import uuid
 from dataclasses import dataclass
@@ -46,6 +47,7 @@ class InstitutionConfig:
     receiving_facility: str          # MSH-6: target CAD receiving facility
     message_profile_name: str        # MSH-21: human-readable profile label (e.g. "Message au format CAD ORU_R01 v1")
     message_profile_oid: str         # MSH-21: profile version OID (e.g. "1.2.250.1.710.1.15.9.1.1.1")
+    local_data_parser: str           # dotted module path to the institution's local data parser
 
 
 class HL7v2Generator:
@@ -568,56 +570,78 @@ class HL7v2Generator:
         for obx1_value in ["1", "2", "3"]:
             files = sorted(files_by_obx1.get(obx1_value, []))
             obx4_index = 1  # OBX-4 counter (increments for each OBX segment)
+            files_set = set(files)
 
             for file_ref in files:
                 # Extract filename for format detection (file_ref may include path)
                 filename = os.path.basename(file_ref)
-                code, description, system = self._get_file_format_info(filename)
+                # Two cases: normal data file, or orphaned sidecar
+                if filename.endswith(".sha256"):
+                    data_ref = file_ref[: -len(".sha256")]
+                    if data_ref in files_set:
+                        continue
+                    sidecar_ref = file_ref
+                    hash_b64 = self._read_sha256_b64_from_sidecar(
+                        os.path.join(directory_path, file_ref)
+                    )
+                else:
+                    data_ref = file_ref
+                    sidecar_ref = file_ref + ".sha256"
+                    if sidecar_ref in files_set:
+                        hash_b64 = self._read_sha256_b64_from_sidecar(
+                            os.path.join(directory_path, sidecar_ref)
+                        )
+                    else:
+                        sidecar_ref = None
+                        hash_b64 = self._compute_sha256_b64(
+                            os.path.join(directory_path, file_ref)
+                        )
 
+                data_filename = os.path.basename(data_ref)
+                code, description, system = self._get_file_format_info(data_filename)
+
+                # 1. RP OBX: reference pointer to data file
                 observation_group = order_observation.add_group("ORU_R01_OBSERVATION")
                 obx = observation_group.add_segment("OBX")
-
                 # OBX-1: Individual number (1=patient, 2=father, 3=mother)
                 obx.obx_1 = obx1_value
-
+                # OBX-2: Value Type
+                obx.obx_2 = "RP"
                 # OBX-3: Observation Identifier (format code)
                 obx.obx_3 = f"{code}^{description}^{system}"
-
                 # OBX-4: File index within this individual's group
                 obx.obx_4 = str(obx4_index)
                 obx4_index += 1
+                obx.obx_5 = data_ref
+                obx.obx_11 = "F"
+                obx.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
 
-                # OBX-2 and OBX-5: Different handling for .sha256 files
-                if filename.endswith(".sha256"):
-                    # 1. RP datatype: reference pointer to .sha256 file
-                    obx.obx_2 = "RP"
-                    obx.obx_5 = file_ref
-                    obx.obx_11 = "F"
-                    obx.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
-
-                    # 2. ED datatype: embed hash value in base64 (second OBX)
-                    observation_group_ed = order_observation.add_group(
-                        "ORU_R01_OBSERVATION"
-                    )
-                    obx_ed = observation_group_ed.add_segment("OBX")
-                    obx_ed.obx_1 = obx1_value
-                    obx_ed.obx_2 = "ED"
-                    obx_ed.obx_3 = (
-                        "operation_3098^SHA256 Checksum^http://edamontology.org"
-                    )
-                    obx_ed.obx_4 = str(obx4_index)
+                # 2. RP OBX: reference pointer to .sha256 sidecar (if present)
+                if sidecar_ref is not None:
+                    sidecar_filename = os.path.basename(sidecar_ref)
+                    s_code, s_desc, s_system = self._get_file_format_info(sidecar_filename)
+                    observation_group_s = order_observation.add_group("ORU_R01_OBSERVATION")
+                    obx_s = observation_group_s.add_segment("OBX")
+                    obx_s.obx_1 = obx1_value
+                    obx_s.obx_2 = "RP"
+                    obx_s.obx_3 = f"{s_code}^{s_desc}^{s_system}"
+                    obx_s.obx_4 = str(obx4_index)
                     obx4_index += 1
-                    full_path = os.path.join(directory_path, file_ref)
-                    hash_base64 = self._read_sha256_value(full_path)
-                    obx_ed.obx_5 = f"^operation_3098^SHA256^Base64^{hash_base64}"
-                    obx_ed.obx_11 = "F"
-                    obx_ed.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
-                else:
-                    # RP datatype: reference pointer to file
-                    obx.obx_2 = "RP"
-                    obx.obx_5 = file_ref
-                    obx.obx_11 = "F"
-                    obx.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+                    obx_s.obx_5 = sidecar_ref
+                    obx_s.obx_11 = "F"
+                    obx_s.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+
+                # 3. ED OBX: embedded SHA-256 hash of the data file
+                observation_group_ed = order_observation.add_group("ORU_R01_OBSERVATION")
+                obx_ed = observation_group_ed.add_segment("OBX")
+                obx_ed.obx_1 = obx1_value
+                obx_ed.obx_2 = "ED"
+                obx_ed.obx_3 = "operation_3098^SHA256 Checksum^http://edamontology.org"
+                obx_ed.obx_4 = str(obx4_index)
+                obx4_index += 1
+                obx_ed.obx_5 = f"^TXT^SHA256^Base64^{hash_b64}"
+                obx_ed.obx_11 = "F"
+                obx_ed.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
 
     def _populate_prt(
         self,
@@ -715,19 +739,27 @@ class HL7v2Generator:
             )
             raise
 
-    def _read_sha256_value(self, sha256_filepath: str) -> str:
-        """Read hash value from .sha256 file and return base64 encoded.
+    def _compute_sha256_b64(self, filepath: str) -> str:
+        """Compute SHA-256 of a file and return its hex digest Base64-encoded.
 
-        .sha256 file format: "<hash>  <filename>"
-
-        :param sha256_filepath: Full path to the .sha256 file
-        :type sha256_filepath: str
-        :return: Base64 encoded hash value
+        :param filepath: Full path to the file
+        :type filepath: str
+        :return: Base64-encoded hex digest
         :rtype: str
         """
-        with open(sha256_filepath, encoding="utf-8") as f:
+        digest = hashlib.sha256(open(filepath, "rb").read()).hexdigest()
+        return base64.b64encode(digest.encode()).decode()
+
+    def _read_sha256_b64_from_sidecar(self, sidecar_path: str) -> str:
+        """Read SHA-256 hex digest from a .sha256 sidecar file and return Base64-encoded.
+
+        :param sidecar_path: Full path to the .sha256 sidecar file
+        :type sidecar_path: str
+        :return: Base64-encoded hex digest
+        :rtype: str
+        """
+        with open(sidecar_path, encoding="utf-8") as f:
             content = f.read().strip()
-        # Format: "abc123def456...  filename.bam" (two spaces)
         hash_value = content.split("  ")[0]
         return base64.b64encode(hash_value.encode()).decode()
 
@@ -758,6 +790,38 @@ class HL7v2Generator:
             raise ValueError(f"Unsupported file extension: .{extension}")
 
         return format_info["code"], format_info["description"], format_info["system"]
+
+    def generate_and_seal(
+        self,
+        parsed_report_data: CompositionData,
+        directory: "Path",
+        name: str,
+    ) -> "Path":
+        """Generate an HL7v2 message, write it to disk, and "seal" it
+        with a .hl7.sha256 checksum file.
+
+        :param parsed_report_data: Business model containing all parsed report data
+        :type parsed_report_data: CompositionData
+        :param directory: Directory where the .hl7 and .hl7.sha256 files will be written
+        :type directory: Path
+        :param name: Prescription name used as the file stem (e.g. "DEMO-PRESCRIPTION-001")
+        :type name: str
+        :return: Path to the written .hl7 file
+        :rtype: Path
+        """
+        from pathlib import Path as _Path
+
+        directory = _Path(directory)
+        hl7_message = self.generate(parsed_report_data, files_directory=str(directory))
+
+        hl7_file = directory / f"{name}.hl7"
+        hl7_file.write_text(hl7_message, encoding="utf-8")
+
+        # Always force-recalculate the .hl7.sha256
+        digest = hashlib.sha256(hl7_file.read_bytes()).hexdigest()
+        (directory / f"{name}.hl7.sha256").write_text(f"{digest}  {hl7_file.name}\n", encoding="utf-8")
+
+        return hl7_file
 
     def validate_message(self, hl7_message: str) -> bool:
         """Basic validation of generated HL7v2 message.
