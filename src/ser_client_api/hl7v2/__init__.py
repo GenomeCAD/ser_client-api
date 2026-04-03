@@ -3,7 +3,7 @@ HL7v2 domain models for genomics report forwarding.
 """
 
 from .hl7v2_generator import HL7v2Generator, InstitutionConfig
-from .gleaves import GleavesJSONParser
+from .seqoia.parser import SeqoiaParser
 from .utils import generate_sidecars
 from .institutions import SEQOIA, AURAGEN, PERIGENOMED
 from .domain_models import (
@@ -22,7 +22,7 @@ from .domain_models import (
 __all__ = [
     "HL7v2Generator",
     "InstitutionConfig",
-    "GleavesJSONParser",
+    "SeqoiaParser",
     "generate_sidecars",
     "SEQOIA",
     "AURAGEN",
