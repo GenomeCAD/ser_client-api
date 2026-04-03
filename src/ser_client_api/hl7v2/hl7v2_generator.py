@@ -574,34 +574,49 @@ class HL7v2Generator:
             for file_ref in files:
                 # Extract filename for format detection (file_ref may include path)
                 filename = os.path.basename(file_ref)
+                # Two cases: normal data file, or orphaned sidecar
                 if filename.endswith(".sha256"):
-                    continue
+                    data_ref = file_ref[: -len(".sha256")]
+                    if data_ref in files_set:
+                        continue
+                    sidecar_ref = file_ref
+                    hash_b64 = self._read_sha256_b64_from_sidecar(
+                        os.path.join(directory_path, file_ref)
+                    )
+                else:
+                    data_ref = file_ref
+                    sidecar_ref = file_ref + ".sha256"
+                    if sidecar_ref in files_set:
+                        hash_b64 = self._read_sha256_b64_from_sidecar(
+                            os.path.join(directory_path, sidecar_ref)
+                        )
+                    else:
+                        sidecar_ref = None
+                        hash_b64 = self._compute_sha256_b64(
+                            os.path.join(directory_path, file_ref)
+                        )
 
-                code, description, system = self._get_file_format_info(filename)
+                data_filename = os.path.basename(data_ref)
+                code, description, system = self._get_file_format_info(data_filename)
 
                 # 1. RP OBX: reference pointer to data file
                 observation_group = order_observation.add_group("ORU_R01_OBSERVATION")
                 obx = observation_group.add_segment("OBX")
-
                 # OBX-1: Individual number (1=patient, 2=father, 3=mother)
                 obx.obx_1 = obx1_value
-
                 # OBX-2: Value Type
                 obx.obx_2 = "RP"
-
                 # OBX-3: Observation Identifier (format code)
                 obx.obx_3 = f"{code}^{description}^{system}"
-
                 # OBX-4: File index within this individual's group
                 obx.obx_4 = str(obx4_index)
                 obx4_index += 1
-                obx.obx_5 = file_ref
+                obx.obx_5 = data_ref
                 obx.obx_11 = "F"
                 obx.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
 
                 # 2. RP OBX: reference pointer to .sha256 sidecar (if present)
-                sidecar_ref = file_ref + ".sha256"
-                if sidecar_ref in files_set:
+                if sidecar_ref is not None:
                     sidecar_filename = os.path.basename(sidecar_ref)
                     s_code, s_desc, s_system = self._get_file_format_info(sidecar_filename)
                     observation_group_s = order_observation.add_group("ORU_R01_OBSERVATION")
@@ -623,8 +638,7 @@ class HL7v2Generator:
                 obx_ed.obx_3 = "operation_3098^SHA256 Checksum^http://edamontology.org"
                 obx_ed.obx_4 = str(obx4_index)
                 obx4_index += 1
-                full_path = os.path.join(directory_path, file_ref)
-                obx_ed.obx_5 = f"^TXT^SHA256^Base64^{self._compute_sha256_b64(full_path)}"
+                obx_ed.obx_5 = f"^TXT^SHA256^Base64^{hash_b64}"
                 obx_ed.obx_11 = "F"
                 obx_ed.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
 
@@ -734,6 +748,19 @@ class HL7v2Generator:
         """
         digest = hashlib.sha256(open(filepath, "rb").read()).hexdigest()
         return base64.b64encode(digest.encode()).decode()
+
+    def _read_sha256_b64_from_sidecar(self, sidecar_path: str) -> str:
+        """Read SHA-256 hex digest from a .sha256 sidecar file and return Base64-encoded.
+
+        :param sidecar_path: Full path to the .sha256 sidecar file
+        :type sidecar_path: str
+        :return: Base64-encoded hex digest
+        :rtype: str
+        """
+        with open(sidecar_path, encoding="utf-8") as f:
+            content = f.read().strip()
+        hash_value = content.split("  ")[0]
+        return base64.b64encode(hash_value.encode()).decode()
 
     def _get_file_format_info(self, filename: str) -> Tuple[str, str, str]:
         """Get format code, description and system for a given filename.
