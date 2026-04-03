@@ -96,6 +96,7 @@ def institution():
         receiving_facility="TEST FACILITY^456^1.2.3",
         message_profile_name="Message au format CAD ORU_R01 v1",
         message_profile_oid="1.2.250.1.710.1.15.9.1.1.1",
+        local_data_parser="ser_client_api.hl7v2.seqoia.parser",
     )
 
 
