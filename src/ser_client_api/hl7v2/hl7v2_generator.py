@@ -47,6 +47,7 @@ class InstitutionConfig:
     receiving_facility: str          # MSH-6: target CAD receiving facility
     message_profile_name: str        # MSH-21: human-readable profile label (e.g. "Message au format CAD ORU_R01 v1")
     message_profile_oid: str         # MSH-21: profile version OID (e.g. "1.2.250.1.710.1.15.9.1.1.1")
+    local_data_parser: str           # dotted module path to the institution's local data parser
 
 
 class HL7v2Generator:
