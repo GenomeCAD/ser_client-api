@@ -7,13 +7,13 @@ import base64
 import hashlib
 import os
 import uuid
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 from hl7apy import load_message_profile
 from hl7apy.consts import VALIDATION_LEVEL
 from hl7apy.core import Message
+from ser_client_api.hl7v2.institution_config import InstitutionConfig
 from ser_client_api.hl7v2.domain_models import (
     CareTeamData,
     CompositionData,
@@ -29,25 +29,6 @@ from ser_client_api.hl7v2.domain_models import (
 
 # GIP-CPS OID for "type_identifiant_structure"
 OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
-
-
-@dataclass
-class InstitutionConfig:
-    """Sending-institution identifiers for HL7v2 message headers.
-    """
-
-    lab_name: str                    # MSH-3, PID-3/18, PV1, PRT-8
-    lab_finess: str                  # FINESS-ET of the sending lab
-    facility_name: str               # MSH-4, SFT-1
-    facility_finess: str             # FINESS-ET of the facility (MSH-4)
-    facility_finess_ej: str          # FINESS-EJ of the facility (SFT-1)
-    software_name: str               # SFT-3: EHR/software product name
-    software_product_information: str  # SFT-5: software product information
-    receiving_application: str       # MSH-5: target CAD receiving application
-    receiving_facility: str          # MSH-6: target CAD receiving facility
-    message_profile_name: str        # MSH-21: human-readable profile label (e.g. "Message au format CAD ORU_R01 v1")
-    message_profile_oid: str         # MSH-21: profile version OID (e.g. "1.2.250.1.710.1.15.9.1.1.1")
-    local_data_parser: str           # dotted module path to the institution's local data parser
 
 
 class HL7v2Generator:

@@ -17,7 +17,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+dependencies = [
+    "hl7apy",
+]
 requires-python = ">=3.12"
 
 [project.optional-dependencies]

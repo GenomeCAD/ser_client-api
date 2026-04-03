@@ -2,7 +2,7 @@
 Pre-defined InstitutionConfig instances for the three SeqOIA network members.
 """
 
-from .hl7v2_generator import InstitutionConfig
+from .institution_config import InstitutionConfig
 
 # Common CAD receiving-end identifiers (same for all institutions)
 _RECEIVING_APPLICATION = "GIP COLLECTEUR ANALYSEUR DE DONNEES^313003057000027^1.2.250.1.71.4.2.2"

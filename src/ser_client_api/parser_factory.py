@@ -4,7 +4,7 @@ ParserFactory — dynamically loads the institution-specific local data parser.
 
 import importlib
 
-from ser_client_api.hl7v2.hl7v2_generator import InstitutionConfig
+from ser_client_api.hl7v2.institution_config import InstitutionConfig
 
 
 class ParserFactory:
