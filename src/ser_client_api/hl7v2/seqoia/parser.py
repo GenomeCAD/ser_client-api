@@ -76,17 +76,20 @@ class SeqoiaParser:
 
     def _parse_patient(self, json_data: Dict[str, Any]) -> PatientData:
         patients_array = _get_required_field(json_data, "patients")
-        main_patient_info = _get_required_field(patients_array[0], "patient")
+        main_patient_entry = patients_array[0]
+        main_patient_info = _get_required_field(main_patient_entry, "patient")
 
-        birth_date = datetime.strptime(
-            _get_required_field(main_patient_info, "date_naissance"), "%Y-%m-%d"
-        ).date()
+        birth_date_str = _get_required_field(main_patient_info, "date_naissance")
+        try:
+            birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            birth_date = None
 
         patient_id_obj = _get_required_field(main_patient_info, "id")
         main_patient_id = _get_required_field(patient_id_obj, "value")
         main_patient_sex = _get_required_field(main_patient_info, "sexe")
 
-        date_prelevement_ms = _get_required_field(main_patient_info, "date_prelevement")
+        date_prelevement_ms = _get_required_field(main_patient_entry, "date_prelevement")
         date_prelevement = datetime.fromtimestamp(date_prelevement_ms / 1000, tz=timezone.utc)
 
         return PatientData(
