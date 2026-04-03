@@ -790,6 +790,38 @@ class HL7v2Generator:
 
         return format_info["code"], format_info["description"], format_info["system"]
 
+    def generate_and_seal(
+        self,
+        parsed_report_data: CompositionData,
+        directory: "Path",
+        name: str,
+    ) -> "Path":
+        """Generate an HL7v2 message, write it to disk, and "seal" it
+        with a .hl7.sha256 checksum file.
+
+        :param parsed_report_data: Business model containing all parsed report data
+        :type parsed_report_data: CompositionData
+        :param directory: Directory where the .hl7 and .hl7.sha256 files will be written
+        :type directory: Path
+        :param name: Prescription name used as the file stem (e.g. "DEMO-PRESCRIPTION-001")
+        :type name: str
+        :return: Path to the written .hl7 file
+        :rtype: Path
+        """
+        from pathlib import Path as _Path
+
+        directory = _Path(directory)
+        hl7_message = self.generate(parsed_report_data, files_directory=str(directory))
+
+        hl7_file = directory / f"{name}.hl7"
+        hl7_file.write_text(hl7_message, encoding="utf-8")
+
+        # Always force-recalculate the .hl7.sha256
+        digest = hashlib.sha256(hl7_file.read_bytes()).hexdigest()
+        (directory / f"{name}.hl7.sha256").write_text(f"{digest}  {hl7_file.name}\n", encoding="utf-8")
+
+        return hl7_file
+
     def validate_message(self, hl7_message: str) -> bool:
         """Basic validation of generated HL7v2 message.
 
