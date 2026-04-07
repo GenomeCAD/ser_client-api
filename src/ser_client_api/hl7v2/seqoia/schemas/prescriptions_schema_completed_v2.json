@@ -228,6 +228,7 @@
                 "properties": {
                   "hrd": {
                     "type": [
+                      "object",
                       "number",
                       "null"
                     ]
@@ -251,7 +252,10 @@
                     ]
                   },
                   "qc_values_mr": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "additionalProperties": {
                       "type": "object",
                       "properties": {
@@ -635,8 +639,8 @@
       }
     },
     "date_last_modified": {
-      "type": "string",
-      "format": "date-time"
+      "type": "number",
+      "format": "epoch_ms"
     },
     "hasDateLastModified": {
       "type": "number"
