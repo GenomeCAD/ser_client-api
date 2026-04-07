@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "hl7apy",
+    "jsonschema>=4.0",
 ]
 requires-python = ">=3.12"
 
@@ -32,7 +33,11 @@ dev = [
 packages = ["src/ser_client_api"]
 include = [
     "src/ser_client_api/**/*.py",
-    "src/ser_client_api/hl7v2/profiles/**",
+    "src/ser_client_api/hl7v2/gipcad/profiles/**",
+    "src/ser_client_api/hl7v2/seqoia/examples/**",
+    "src/ser_client_api/hl7v2/seqoia/schemas/**",
+    "src/ser_client_api/hl7v2/auragen/examples/**",
+    "src/ser_client_api/hl7v2/auragen/schemas/**",
 ]
 
 [tool.pytest.ini_options]

@@ -27,11 +27,11 @@ MINIMAL_PRESCRIPTION_JSON = {
                 "nom": "DUPONT",
                 "nom_naissance": "DUPONT",
                 "prenom": "MARIE",
-                "date_prelevement": 1741651200000,
             },
             "lien": {"key": "patient", "name": "Patient"},
             "is_data_reusable_for_research": True,
             "dateConsent": 1741940668351,
+            "date_prelevement": 1741651200000,
             "id_anon": "TESTID",
             "resultat_compte_rendu_gleaves": {},
         },
@@ -82,6 +82,11 @@ MINIMAL_PRESCRIPTION_JSON = {
 }
 
 
+@pytest.fixture
+def minimal_prescription_json():
+    return MINIMAL_PRESCRIPTION_JSON
+
+
 @pytest.fixture(scope="session")
 def institution():
     return InstitutionConfig(
@@ -104,7 +109,7 @@ def institution():
 def generator(institution):
     profiles_dir = (
         Path(ser_client_api.__file__).parent
-        / "hl7v2" / "profiles" / "gipcad" / "v000_compiled"
+        / "hl7v2" / "gipcad" / "profiles" / "v000_compiled"
     )
     return HL7v2Generator(
         profile_path=str(profiles_dir / "oru_r01_lab36"),

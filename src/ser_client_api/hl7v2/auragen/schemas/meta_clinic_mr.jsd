@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auragen.fr/json-schemas/meta_clinic_mr.jsd",
+  "$defs": {
+    "libid": {
+      "type": "string",
+      "pattern": "^(LIB(\\d{8}|\\d{10})|UN-(MR|OC)-\\d{7}-\\d{1,2})$"
+    }
+  },
+  "title": "clinical case MR/OC",
+  "description": "auragen MR/OC clinical case",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "file description",
+      "type": "string"
+    },
+    "version": {
+      "description": "schema version number",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "case_id": {
+      "description": "case identifier",
+      "type": "string",
+      "pattern": "^(MR|OC)-\\d{7}$"
+    },
+    "indication_code": {
+      "description": "code for indication",
+      "type": "string",
+      "pattern": "^(IMR|IOC)\\d{4}$"
+    },
+    "hpo_terms": {
+      "description": "array of HPO terms",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^HP:\\d{7}$"
+      }
+    },
+    "index_case": {
+      "description": "identifier of index case library",
+      "$ref": "#/$defs/libid"
+    },
+    "individuals": {
+      "description": "array of individuals (including index case)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lib_id": {
+            "description": "identifier of individual library",
+            "$ref": "#/$defs/libid"
+          },
+          "sex": {
+            "description": "genetic sex of individual",
+            "enum": ["male", "female", null]
+          },
+          "status": {
+            "description": "affected status of individual",
+            "enum": ["affected", "unaffected", null]
+          },
+          "sample_type": {
+            "description": "type of sample",
+            "enum": ["blood", "dna", "organ", "fibroblast", "cell_dry_pellet", null]
+          },
+          "family": {
+            "description": "family relation to index case",
+            "type": "object",
+            "properties": {
+              "link": {
+                "description": "family link to index case",
+                "enum": ["child", "first-cousin", "grandchild", "grandparent",
+                         "great-grandparent", "great-parent-sibling", "half-sibling",
+                         "index-case", "parent", "parent-sibling", "second-cousin",
+                         "sibling", "sibling-child", "spouse",
+                         "undefined", null]
+              },
+              "branch": {
+                "description": "optional branch qualifier",
+                "enum": ["paternal", "maternal", null]
+              },
+              "comment": {
+                "description": "optional comment",
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["link"],
+            "additionalProperties": false
+          },
+          "birth_year": {
+            "description": "year of birth",
+            "type": ["number", "null"]
+          },
+          "parent1": {
+            "description": "identifier of first parent (father or mother) if any",
+            "anyOf": [
+                {
+                  "$ref": "#/$defs/libid"
+                },
+                {
+                  "type": "null"
+                }
+            ]
+          },
+          "parent2": {
+            "description": "identifier of second parent (father or mother) if any",
+            "anyOf": [
+                {
+                  "$ref": "#/$defs/libid"
+                },
+                {
+                  "type": "null"
+                }
+            ]
+          }
+        },
+        "required": ["lib_id", "sex", "status", "sample_type", "family",
+                     "birth_year", "parent1", "parent2"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["description", "version", "case_id", "indication_code", "hpo_terms", "index_case",
+               "individuals"],
+  "additionalProperties": false
+}

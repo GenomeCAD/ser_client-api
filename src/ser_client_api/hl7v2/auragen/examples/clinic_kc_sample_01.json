@@ -1,0 +1,33 @@
+{
+  "description": "auragen KC case example",
+  "version": "1.0",
+  "case_id": "KC-0001234",
+  "indication_code": "IKC0421",
+  "sex": "female",
+  "birth_year": 1978,
+  "cimo": {
+    "primary": {
+      "topography": "C50.9",
+      "morphology": "8500/3"
+    },
+    "sample": {
+      "topography": "C50.9",
+      "morphology": "8500/3"
+    }
+  },
+  "sampling_date": "14/03/2024",
+  "cellularity": "50",
+  "conservation": "ffpe",
+  "libraries": {
+    "wgs": {
+      "tumour": "LIB20240001",
+      "normal": "LIB20240002"
+    },
+    "wes": {
+      "tumour": "LIB20240003"
+    },
+    "rnaseq": {
+      "tumour": "LIB20240004"
+    }
+  }
+}

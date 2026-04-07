@@ -2,9 +2,12 @@
 SeqOIA local data parser — GLeaves JSON format.
 """
 
+import importlib.resources
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+
+import jsonschema
 
 from ser_client_api.hl7v2.domain_models import (
     CareTeamData,
@@ -22,10 +25,10 @@ from ser_client_api.hl7v2.domain_models import (
 
 def _get_required_field(data: Dict[str, Any], field: str) -> Any:
     if field not in data:
-        raise KeyError(f"Missing required field: '{field}'")
+        raise ValueError(f"Missing required field: '{field}'")
     value = data[field]
     if not value:
-        raise KeyError(f"Required field '{field}' is empty or None")
+        raise ValueError(f"Required field '{field}' is empty or None")
     return value
 
 
@@ -44,7 +47,24 @@ class SeqoiaParser:
     Isolates business models from external JSON structure changes.
     """
 
+    _schema = None  # cached at class level
+
+    @classmethod
+    def _get_schema(cls) -> Dict[str, Any]:
+        if cls._schema is None:
+            schema_file = (
+                importlib.resources.files("ser_client_api.hl7v2.seqoia")
+                / "schemas"
+                / "prescriptions_schema_completed_v2.json"
+            )
+            cls._schema = json.loads(schema_file.read_text(encoding="utf-8"))
+        return cls._schema
+
     def parse(self, json_data: Dict[str, Any]) -> CompositionData:
+        try:
+            jsonschema.validate(instance=json_data, schema=self._get_schema())
+        except jsonschema.ValidationError as e:
+            raise ValueError(f"SeqOIA JSON schema validation failed: {e.message}")
         try:
             patient = self._parse_patient(json_data)
             rcp_data = self._parse_rcp_data(json_data)
@@ -69,24 +89,29 @@ class SeqoiaParser:
                 next_of_kin=next_of_kin_data,
             )
 
-        except KeyError as e:
-            raise ValueError(f"Missing required JSON field: {e}")
+        except ValueError:
+            raise
         except Exception as e:
             raise ValueError(f"Failed to parse GLeaves JSON: {e}")
 
     def _parse_patient(self, json_data: Dict[str, Any]) -> PatientData:
         patients_array = _get_required_field(json_data, "patients")
-        main_patient_info = _get_required_field(patients_array[0], "patient")
+        main_patient_entry = patients_array[0]
+        main_patient_info = _get_required_field(main_patient_entry, "patient")
 
-        birth_date = datetime.strptime(
-            _get_required_field(main_patient_info, "date_naissance"), "%Y-%m-%d"
-        ).date()
+        birth_date = None
+        birth_date_str = _get_optional_field(main_patient_info, "date_naissance")
+        if birth_date_str:
+            try:
+                birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                pass
 
         patient_id_obj = _get_required_field(main_patient_info, "id")
         main_patient_id = _get_required_field(patient_id_obj, "value")
         main_patient_sex = _get_required_field(main_patient_info, "sexe")
 
-        date_prelevement_ms = _get_required_field(main_patient_info, "date_prelevement")
+        date_prelevement_ms = _get_required_field(main_patient_entry, "date_prelevement")
         date_prelevement = datetime.fromtimestamp(date_prelevement_ms / 1000, tz=timezone.utc)
 
         return PatientData(

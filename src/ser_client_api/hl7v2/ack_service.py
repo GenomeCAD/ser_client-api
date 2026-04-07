@@ -120,7 +120,7 @@ def _analyze_error_segments(ack_msg) -> Tuple[List[str], List[str], List[str]]:
     return critical_error_messages, warning_messages, info_messages
 
 
-def determine_transfer_status(analysis: AckAnalysisResult) -> str:
+def determine_transfer_status(analysis: AckAnalysisResult) -> int:
     """Determine final transfer status based on MSA status and error analysis"""
     # 0 OK
     # 1 ERROR retry
@@ -138,7 +138,7 @@ def determine_transfer_status(analysis: AckAnalysisResult) -> str:
 
 
 def _log_ack_results(
-    filename: str, analysis: AckAnalysisResult, transfer_status: str
+    filename: str, analysis: AckAnalysisResult, transfer_status: int
 ) -> None:
     """Log ACK processing results - simplified"""
     # Base context
@@ -184,11 +184,11 @@ def process_ack_file_with_hl7apy(ack_filename: str, ack_content: str, profile_pa
     try:
         ack_msg = parse_hl7_message_robust(ack_content, profile_path)
         analysis = analyze_ack_message(ack_msg)
-        transfer_status: int = determine_transfer_status(analysis)
+        transfer_status = determine_transfer_status(analysis)
         _log_ack_results(ack_filename, analysis, transfer_status)
         return transfer_status
     except HL7apyException as e:
-        """Handle HL7 parsing errors"""
+        # Handle HL7 parsing errors
         logger.error(f"HL7 parsing error in ACK file {ack_filename}: {e}")
         logger.error(f"ACK content preview: {ack_content[:200]}...")
         return 2  # failed, do not retry
