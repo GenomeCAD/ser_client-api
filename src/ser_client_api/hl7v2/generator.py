@@ -334,7 +334,7 @@ class HL7v2Generator:
         )
         # PID.5 - Patient Name
         patient_group.pid.patient_name = (
-            f"{patient.patient_given_name}" f"^{patient.patient_family_name}^^^^^L"
+            f"{patient.patient_family_name}^{patient.patient_given_name}^^^^^L"
         )
         # PID-7: Date/Time of Birth
         patient_group.pid.date_time_of_birth = patient.hl7_birth_date
