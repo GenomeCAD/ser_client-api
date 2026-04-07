@@ -16,7 +16,6 @@ import json
 import pytest
 
 from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser
-from tests.conftest import MINIMAL_PRESCRIPTION_JSON
 
 
 @pytest.fixture(autouse=True)
@@ -30,74 +29,73 @@ def reset_schema_cache():
 class TestSchemaValidation:
     """Layer 1: jsonschema type/structure checks."""
 
-    def test_valid_prescription_passes(self):
-        composition = SeqoiaParser().parse(MINIMAL_PRESCRIPTION_JSON)
-        assert composition.report_id == MINIMAL_PRESCRIPTION_JSON["_id"]
+    def test_valid_prescription_passes(self, minimal_prescription_json):
+        composition = SeqoiaParser().parse(minimal_prescription_json)
+        assert composition.report_id == minimal_prescription_json["_id"]
 
     def test_root_not_object_raises_schema_error(self):
         with pytest.raises(ValueError, match="schema validation"):
             SeqoiaParser().parse([1, 2, 3])
 
-    def test_patients_not_array_raises_schema_error(self):
-        data = {**MINIMAL_PRESCRIPTION_JSON, "patients": "not an array"}
+    def test_patients_not_array_raises_schema_error(self, minimal_prescription_json):
+        data = {**minimal_prescription_json, "patients": "not an array"}
         with pytest.raises(ValueError, match="schema validation"):
             SeqoiaParser().parse(data)
 
-    def test_patients_item_not_object_raises_schema_error(self):
-        data = {**MINIMAL_PRESCRIPTION_JSON, "patients": ["string_instead_of_object"]}
+    def test_patients_item_not_object_raises_schema_error(self, minimal_prescription_json):
+        data = {**minimal_prescription_json, "patients": ["string_instead_of_object"]}
         with pytest.raises(ValueError, match="schema validation"):
             SeqoiaParser().parse(data)
 
-    def test_dateconsent_string_instead_of_number_raises_schema_error(self):
-        data = copy.deepcopy(MINIMAL_PRESCRIPTION_JSON)
+    def test_dateconsent_string_instead_of_number_raises_schema_error(self, minimal_prescription_json):
+        data = copy.deepcopy(minimal_prescription_json)
         data["patients"][0]["dateConsent"] = "2024-01-01"
         with pytest.raises(ValueError, match="schema validation"):
             SeqoiaParser().parse(data)
 
-    def test_date_prelevement_string_instead_of_number_raises_schema_error(self):
-        data = copy.deepcopy(MINIMAL_PRESCRIPTION_JSON)
+    def test_date_prelevement_string_instead_of_number_raises_schema_error(self, minimal_prescription_json):
+        data = copy.deepcopy(minimal_prescription_json)
         data["patients"][0]["date_prelevement"] = "2024-01-01"
         with pytest.raises(ValueError, match="schema validation"):
             SeqoiaParser().parse(data)
 
-    def test_error_message_identifies_seqoia_and_includes_jsonschema_detail(self):
-        data = {**MINIMAL_PRESCRIPTION_JSON, "patients": 42}
+    def test_error_message_identifies_seqoia_and_includes_jsonschema_detail(self, minimal_prescription_json):
+        data = {**minimal_prescription_json, "patients": 42}
         with pytest.raises(ValueError) as exc_info:
             SeqoiaParser().parse(data)
         msg = str(exc_info.value)
         assert "SeqOIA JSON schema validation failed" in msg
-        # jsonschema detail (field name or type info) should be present
         assert "42" in msg or "patients" in msg
 
 
 class TestParserValidation:
     """Layer 2: _get_required_field checks for business-required fields."""
 
-    def test_missing_preindication_bypasses_schema_but_fails_parser(self):
+    def test_missing_preindication_bypasses_schema_but_fails_parser(self, minimal_prescription_json):
         # Schema has no `required` arrays, so the missing field passes layer 1.
         # Layer 2 (_get_required_field) raises ValueError.
-        data = {k: v for k, v in MINIMAL_PRESCRIPTION_JSON.items() if k != "preindication"}
+        data = {k: v for k, v in minimal_prescription_json.items() if k != "preindication"}
         with pytest.raises(ValueError):
             SeqoiaParser().parse(data)
 
-    def test_missing_analysis_info_bypasses_schema_but_fails_parser(self):
-        data = {k: v for k, v in MINIMAL_PRESCRIPTION_JSON.items() if k != "analysis_info"}
+    def test_missing_analysis_info_bypasses_schema_but_fails_parser(self, minimal_prescription_json):
+        data = {k: v for k, v in minimal_prescription_json.items() if k != "analysis_info"}
         with pytest.raises(ValueError):
             SeqoiaParser().parse(data)
 
 
 class TestSchemaCaching:
 
-    def test_schema_loaded_after_first_parse(self):
+    def test_schema_loaded_after_first_parse(self, minimal_prescription_json):
         assert SeqoiaParser._schema is None
-        SeqoiaParser().parse(MINIMAL_PRESCRIPTION_JSON)
+        SeqoiaParser().parse(minimal_prescription_json)
         assert SeqoiaParser._schema is not None
 
-    def test_schema_object_is_reused_across_calls(self):
+    def test_schema_object_is_reused_across_calls(self, minimal_prescription_json):
         parser = SeqoiaParser()
-        parser.parse(MINIMAL_PRESCRIPTION_JSON)
+        parser.parse(minimal_prescription_json)
         schema_after_first = SeqoiaParser._schema
-        parser.parse(MINIMAL_PRESCRIPTION_JSON)
+        parser.parse(minimal_prescription_json)
         assert SeqoiaParser._schema is schema_after_first
 
 

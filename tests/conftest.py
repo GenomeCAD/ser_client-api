@@ -82,6 +82,11 @@ MINIMAL_PRESCRIPTION_JSON = {
 }
 
 
+@pytest.fixture
+def minimal_prescription_json():
+    return MINIMAL_PRESCRIPTION_JSON
+
+
 @pytest.fixture(scope="session")
 def institution():
     return InstitutionConfig(
