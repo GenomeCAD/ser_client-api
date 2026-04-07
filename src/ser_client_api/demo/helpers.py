@@ -22,19 +22,35 @@ def get_prescription_directory(prescription_name: str) -> Tuple[Path, Path]:
     return tmp_dir, presc_dir
 
 
-def populate_temporary_presc_dir(presc_dir: Path, prescription_name: str, id_anon: str) -> None:
+def populate_temporary_presc_dir(presc_dir: Path, prescription_name: str, composition: CompositionData) -> None:
     """Populate a prescription directory with minimal dummy data files.
-    Creates a patient subdirectory (named by id_anon) containing stub
-    BAM, BAI, VCF and tar.gz files sufficient to exercise the full
+
+    - Root-level shared files (VCF, tar.gz) attributed to the main patient (OBX-1=1)
+    - One subdirectory per individual named by id_anon, each containing stub BAM/BAI files
+    - Next-of-kin subdirectories created for each entry in composition.next_of_kin
+
+    The resulting structure is sufficient to exercise the full
     generate → sidecar → seal → transfer pipeline.
-    #TODO: add next of kin files
     """
-    patient_dir = presc_dir / id_anon
-    patient_dir.mkdir(parents=True)
-    (patient_dir / f"{prescription_name}_final.vcf").write_text("##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\n")
-    (patient_dir / f"{prescription_name}_final.tar.gz").write_bytes(b"\x1f\x8b" + b"\x00" * 20)
-    (patient_dir / f"{prescription_name}_chr1_markdup.bam").write_bytes(b"BAM\x01" + b"\x00" * 100)
-    (patient_dir / f"{prescription_name}_chr1_markdup.bam.bai").write_bytes(b"BAI\x01" + b"\x00" * 20)
+    presc_dir.mkdir(parents=True, exist_ok=True)
+
+    # Root-level shared files (OBX-1="1", main patient)
+    (presc_dir / f"{prescription_name}_final.vcf").write_text("##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\n")
+    (presc_dir / f"{prescription_name}_final.tar.gz").write_bytes(b"\x1f\x8b" + b"\x00" * 20)
+
+    # One subdirectory per individual
+    individuals = [composition.patient]
+    if composition.next_of_kin:
+        individuals += composition.next_of_kin
+
+    for individual in individuals:
+        folder = individual.folder_name
+        if not folder:
+            continue
+        ind_dir = presc_dir / folder
+        ind_dir.mkdir(parents=True, exist_ok=True)
+        (ind_dir / f"{prescription_name}_chr1_markdup.bam").write_bytes(b"BAM\x01" + b"\x00" * 100)
+        (ind_dir / f"{prescription_name}_chr1_markdup.bam.bai").write_bytes(b"BAI\x01" + b"\x00" * 20)
 
 
 def get_composition(institution: InstitutionConfig, prescription_json: Dict[str, Any]) -> CompositionData:

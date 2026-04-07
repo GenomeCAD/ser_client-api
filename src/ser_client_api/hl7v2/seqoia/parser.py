@@ -113,6 +113,7 @@ class SeqoiaParser:
 
         date_prelevement_ms = _get_required_field(main_patient_entry, "date_prelevement")
         date_prelevement = datetime.fromtimestamp(date_prelevement_ms / 1000, tz=timezone.utc)
+        id_anon = _get_optional_field(main_patient_entry, "id_anon")
 
         return PatientData(
             set_id=1,
@@ -122,6 +123,7 @@ class SeqoiaParser:
             birth_date=birth_date,
             sex=main_patient_sex,
             date_prelevement=date_prelevement,
+            id_anon=id_anon,
         )
 
     def _parse_rcp_data(self, json_data: Dict[str, Any]) -> CareTeamData:
@@ -220,6 +222,8 @@ class SeqoiaParser:
             if patient_id_obj:
                 patient_id = _get_optional_field(patient_id_obj, "value")
 
+            id_anon = _get_optional_field(patient_entry, "id_anon")
+
             next_of_kin_list.append(RelatedPersonData(
                 set_id=set_id,
                 relationship_code=rel_code,
@@ -228,6 +232,7 @@ class SeqoiaParser:
                 birth_date=birth_date,
                 sex=_get_optional_field(patient_info, "sexe"),
                 patient_id=patient_id,
+                id_anon=id_anon,
             ))
 
         return next_of_kin_list if next_of_kin_list else None

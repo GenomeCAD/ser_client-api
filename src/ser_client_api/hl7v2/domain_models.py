@@ -57,6 +57,23 @@ class PatientData:
     birth_date: date = None
     sex: Optional[str] = None
     date_prelevement: datetime = None
+    id_anon: Optional[str] = None
+
+    @property
+    def folder_name(self) -> Optional[str]:
+        """Return folder name for this individual's files.
+
+        Prefers id_anon (the real production naming convention).
+        Falls back to FAMILY_GIVEN if id_anon is absent.
+
+        :return: Folder name string, or None if insufficient data
+        :rtype: Optional[str]
+        """
+        if self.id_anon:
+            return self.id_anon
+        if self.patient_family_name and self.patient_given_name:
+            return f"{self.patient_family_name}_{self.patient_given_name}"
+        return None
 
     @property
     def hl7_birth_date(self) -> str:
@@ -141,14 +158,20 @@ class RelatedPersonData:
     birth_date: Optional[date] = None  # NK1-16
     sex: Optional[str] = None  # NK1-15
     patient_id: Optional[str] = None  # IPP for file association
+    id_anon: Optional[str] = None
 
     @property
-    def folder_name(self) -> str:
+    def folder_name(self) -> Optional[str]:
         """Return folder name for this individual's files.
 
-        :return: Folder name in format FAMILY_GIVEN or None
-        :rtype: str
+        Prefers id_anon
+        Falls back to FAMILY_GIVEN if id_anon is absent.
+
+        :return: Folder name string, or None if insufficient data
+        :rtype: Optional[str]
         """
+        if self.id_anon:
+            return self.id_anon
         if self.family_name and self.given_name:
             return f"{self.family_name}_{self.given_name}"
         return None

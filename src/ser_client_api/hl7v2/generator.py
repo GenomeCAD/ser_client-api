@@ -497,12 +497,9 @@ class HL7v2Generator:
 
         # Build mapping: folder_name → OBX-1 value
         # OBX-1 = "1" for main patient, "2" for father, "3" for mother
-        patient_folder = (
-            f"{patient_data.patient_family_name}_{patient_data.patient_given_name}"
-        )
-        folder_to_obx1: Dict[str, str] = {
-            patient_folder: "1",  # Main patient
-        }
+        folder_to_obx1: Dict[str, str] = {}
+        if patient_data.folder_name:
+            folder_to_obx1[patient_data.folder_name] = "1"
 
         if next_of_kin:
             for nok in next_of_kin:
