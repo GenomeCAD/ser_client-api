@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auragen.fr/schemas/meta_libraries.jsd",
+  "$defs": {
+    "libid": {
+      "type": "string",
+      "pattern": "^LIB(\\d{8}|\\d{10})$"
+    }
+  },
+  "title": "libraries metadata KC/MR/OC",
+  "description": "auragen KC/MR/OC libraries metadata",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "file description",
+      "type": "string"
+    },
+    "version": {
+      "description": "schema version number",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "case_id": {
+      "description": "case identifier",
+      "type": "string",
+      "pattern": "^(MR|OC|KC)-\\d{7}$"
+    },
+    "libraries": {
+      "description": "array of libraries metadata",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lib_id": {
+            "description": "identifier of library",
+            "$ref": "#/$defs/libid"
+          },
+          "seq_type": {
+            "description": "sequence type",
+            "enum": ["wgs", "wes", "rnaseq", null]
+          },
+          "sample_type": {
+            "description": "sample type",
+            "enum": ["normal", "tumour", null]
+          },
+          "sample_tissue": {
+            "description": "sample tissue origin",
+            "enum": ["blood", "dna", "organ", "fibroblast", "cell_dry_pellet", null]
+          },
+          "sample_storage": {
+            "description": "sample storage type",
+            "enum": ["frozen", "ffpe", null]
+          },
+          "extraction": {
+            "type": "object",
+            "properties": {
+              "instrument": {
+                "description": "extraction instrument",
+                "type": ["string", "null"]
+              },
+              "kit": {
+                "description": "extraction kit",
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "qualification": {
+            "type": "object",
+            "properties": {
+              "instrument": {
+                "description": "qualification instrument",
+                "type": ["string", "null"]
+              },
+              "kit": {
+                "description": "qualification kit",
+                "type": ["string", "null"]
+              },
+              "din": {
+                "description": "DIN measurement (if relevant)",
+                "type": ["string", "null"]
+              },
+              "rin": {
+                "description": "RIN measurement (if relevant)",
+                "type": ["string", "null"]
+              },
+              "gqn": {
+                "description": "GQN measurement (if relevant)",
+                "type": ["string", "null"]
+              },
+              "rqn": {
+                "description": "RQN measurement (if relevant)",
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "quantification": {
+            "type": "object",
+            "properties": {
+              "instrument": {
+                "description": "quantification instrument",
+                "type": ["string", "null"]
+              },
+              "kit": {
+                "description": "quantification kit",
+                "type": ["string", "null"]
+              },
+              "concentration": {
+                "description": "concentration",
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "preplib": {
+            "type": "object",
+            "properties": {
+              "instrument": {
+                "description": "preplib instrument",
+                "type": ["string", "null"]
+              },
+              "kit": {
+                "description": "preplib kit",
+                "type": ["string", "null"]
+              }
+            }
+          }
+        },
+        "required": ["lib_id", "seq_type", "sample_type", "extraction",
+                     "qualification", "quantification", "preplib"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["description", "version", "case_id", "libraries"],
+  "additionalProperties": false
+}

@@ -1,0 +1,647 @@
+{
+  "_id": "67cecdfdb4cffa55e8707002",
+  "preindication": {
+    "catname": "Cancer",
+    "catkey": "p2",
+    "name": "Cancers avancés en échec thérapeutique",
+    "key": "p2-sp8",
+    "rcp_id": "5e71f8b3efaa9b6f5a729fa6",
+    "rcp_nom": "APHP-TUMEURS-SOLIDES-ADULTE"
+  },
+  "patients": [
+    {
+      "patient": {
+        "id": {
+          "type": "IPP",
+          "value": "XXXX"
+        },
+        "date_naissance": "19XX-12-13",
+        "sexe": "F",
+        "nom": "XXXX",
+        "nom_naissance": "XXXX",
+        "prenom": "XXXX"
+      },
+      "lien": {
+        "key": "patient",
+        "name": "Patient"
+      },
+      "atteint": true,
+      "is_data_reusable_for_research": true,
+      "is_WES_C": false,
+      "is_prescripteur_are_given_FFPE": false,
+      "file_oid": "67d3e7bc472e6776dcb78bc3",
+      "filename": "XXXXX - consentement.pdf",
+      "filetype": "application/pdf",
+      "dateConsent": 1741940668351,
+      "date_prelevement": 1741651200000,
+      "type_prelevement_primaire": "Sang",
+      "id_anon": "66EFA9",
+      "accueilLMG": "7043141",
+      "date_reception_constit": 1741824000000,
+      "accueilLMG_constit": "7043141",
+      "type_de_prelevement_tumoral": "tumeur_congele",
+      "provenence_du_prelevement_tumoral": "HEGP",
+      "date_prelevement_adn": 1740528000000,
+      "pathologiste_referent": "Dr X",
+      "reference_compte_rendu_anatomopathologie": "25B01723",
+      "reference_prelevement_tumoral": "25B01723",
+      "type_histologique": "localisation hépatique de l'adénocarcinome de haut grade de type séreux",
+      "organe_du_prelevement": "ovaire",
+      "cellularite_tumoral_ou_baste": "40",
+      "origine_etat_tumoral": "foie",
+      "etat_tumoral": "metastase",
+      "date_reception_du_prelevement_tumoral": 1740528000000,
+      "numero_adn": "FS17924941",
+      "isWGSNeeded": true,
+      "numero_arn": "FS92538510",
+      "date_prelevement_arn": 1741046400000,
+      "dossiersQualif": [
+        {
+          "fileDQT_oid": "67dbc4861d7cbf7fc1a7abb8",
+          "dqt_filename": "Formulaire d'extraction et qualification des acides nucléiques extraits de tumeurs - 66EFA9.docx",
+          "dqt_filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "dateDossier_DQT": 1742455942574,
+          "type": "extraction_qualification",
+          "lib": "Qualification et Extraction acides nucléiques - Tumeurs congelées"
+        }
+      ],
+      "date_reception_adn_tumoral": 1742428800000,
+      "type_seq_adn": "WGS-T",
+      "accueilLMG_adn": "7043141",
+      "numero_adn_secondaire": "FS94082428",
+      "date_reception_adn_tumoral_secondaire": 1742428800000,
+      "type_seq_adn_secondaire": "WES-T",
+      "date_reception_arn_tumoral": 1742428800000,
+      "concentration_arn_tumoral": "104",
+      "volume_arn_tumoral": "25",
+      "quantite_arn_tumoral": "2600",
+      "valeur_dqn_arn_tumoral": "4",
+      "accueilLMG_arn": "7043141",
+      "resultat_compte_rendu_gleaves": {
+        "variants": [
+          {
+            "contig": "2",
+            "pos": 16559584,
+            "Gene_Name": [
+              "CYRIA"
+            ],
+            "Feature_ID": [
+              "ENST00000381323.7"
+            ],
+            "HGVS_c": "c.712delG",
+            "HGVS_p": "p.Glu238fs",
+            "ADN-Tum-VAF": "0.10",
+            "ADN-Tum-AD": "17/175",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "",
+            "status_cnv": [
+              "DEL (1)",
+              "DUP (1)"
+            ]
+          },
+          {
+            "contig": "2",
+            "pos": 222297009,
+            "Gene_Name": [
+              "PAX3"
+            ],
+            "Feature_ID": [
+              "ENST00000392070.6"
+            ],
+            "HGVS_c": "c.290G>A",
+            "HGVS_p": "p.Arg97His",
+            "ADN-Tum-VAF": "0.20",
+            "ADN-Tum-AD": "38/192",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "tier 1|oncogene,fusion",
+            "status_cnv": [
+              "DEL (1)",
+              "DUP (1)"
+            ]
+          },
+          {
+            "contig": "5",
+            "pos": 151567925,
+            "Gene_Name": [
+              "FAT2"
+            ],
+            "Feature_ID": [
+              "ENST00000261800.5"
+            ],
+            "HGVS_c": "c.1007G>T",
+            "HGVS_p": "p.Arg336Met",
+            "ADN-Tum-VAF": "0.18",
+            "ADN-Tum-AD": "52/287",
+            "ARN-Tum-VAF": "0.21",
+            "ARN-Tum-AD": "3/14",
+            "acmg": "3",
+            "census": "",
+            "status_cnv": [
+              "DUP (2)"
+            ]
+          },
+          {
+            "contig": "5",
+            "pos": 180630711,
+            "Gene_Name": [
+              "FLT4"
+            ],
+            "Feature_ID": [
+              "ENST00000261937.10"
+            ],
+            "HGVS_c": "c.244C>T",
+            "HGVS_p": "p.Arg82*",
+            "ADN-Tum-VAF": "0.20",
+            "ADN-Tum-AD": "81/405",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "tier 1|oncogene",
+            "status_cnv": [
+              "DUP (2)"
+            ]
+          },
+          {
+            "contig": "6",
+            "pos": 56635591,
+            "Gene_Name": [
+              "DST"
+            ],
+            "Feature_ID": [
+              "ENST00000370765.10"
+            ],
+            "HGVS_c": "c.1545_1572delCAAGCTAGAAGACCTTGTTCAGGAATCA",
+            "HGVS_p": "p.His515fs",
+            "ADN-Tum-VAF": "0.28",
+            "ADN-Tum-AD": "57/202",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "",
+            "status_cnv": [
+              "DUP (2)"
+            ]
+          },
+          {
+            "contig": "17",
+            "pos": 7673793,
+            "Gene_Name": [
+              "TP53"
+            ],
+            "Feature_ID": [
+              "ENST00000269305.8"
+            ],
+            "HGVS_c": "c.827C>G",
+            "HGVS_p": "p.Ala276Gly",
+            "ADN-Tum-VAF": "0.45",
+            "ADN-Tum-AD": "86/191",
+            "ARN-Tum-VAF": "0.87",
+            "ARN-Tum-AD": "71/82",
+            "acmg": "3",
+            "census": "tier 1|oncogene,TSG,fusion",
+            "status_cnv": [
+              "Normal (1)",
+              "DEL (1)"
+            ]
+          },
+          {
+            "contig": "17",
+            "pos": 11610537,
+            "Gene_Name": [
+              "DNAH9"
+            ],
+            "Feature_ID": [
+              "ENST00000262442.8"
+            ],
+            "HGVS_c": "c.756G>T",
+            "HGVS_p": "p.Leu252Phe",
+            "ADN-Tum-VAF": "0.18",
+            "ADN-Tum-AD": "24/136",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "",
+            "status_cnv": [
+              "DEL (1)",
+              "Normal (1)"
+            ]
+          },
+          {
+            "contig": "17",
+            "pos": 39462549,
+            "Gene_Name": [
+              "CDK12"
+            ],
+            "Feature_ID": [
+              "ENST00000447079.4"
+            ],
+            "HGVS_c": "c.478G>T",
+            "HGVS_p": "p.Asp160Tyr",
+            "ADN-Tum-VAF": "0.08",
+            "ADN-Tum-AD": "14/173",
+            "ARN-Tum-VAF": "0.25",
+            "ARN-Tum-AD": "43/173",
+            "acmg": "3",
+            "census": "tier 1|TSG",
+            "status_cnv": [
+              "Normal (1)",
+              "DEL (1)"
+            ]
+          },
+          {
+            "contig": "17",
+            "pos": 61861525,
+            "Gene_Name": [
+              "BRIP1"
+            ],
+            "Feature_ID": [
+              "ENST00000259008.6"
+            ],
+            "HGVS_c": "c.15G>A",
+            "HGVS_p": "p.Trp5*",
+            "ADN-Tum-VAF": "0.72",
+            "ADN-Tum-AD": "194/271",
+            "ARN-Tum-VAF": "0.93",
+            "ARN-Tum-AD": "27/29",
+            "acmg": "3",
+            "census": "tier 1|TSG",
+            "status_cnv": [
+              "DUP (2)"
+            ]
+          },
+          {
+            "contig": "X",
+            "pos": 40073953,
+            "Gene_Name": [
+              "BCOR"
+            ],
+            "Feature_ID": [
+              "ENST00000378444.8"
+            ],
+            "HGVS_c": "c.1393G>T",
+            "HGVS_p": "p.Val465Phe",
+            "ADN-Tum-VAF": "0.09",
+            "ADN-Tum-AD": "17/190",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "tier 1|TSG,fusion",
+            "status_cnv": [
+              "DEL (1)",
+              "Normal (1)"
+            ]
+          },
+          {
+            "contig": "X",
+            "pos": 101403858,
+            "Gene_Name": [
+              "GLA"
+            ],
+            "Feature_ID": [
+              "ENST00000218516.3"
+            ],
+            "HGVS_c": "c.322G>A",
+            "HGVS_p": "p.Ala108Thr",
+            "ADN-Tum-VAF": "0.07",
+            "ADN-Tum-AD": "16/241",
+            "ARN-Tum-VAF": "NA",
+            "ARN-Tum-AD": "NA",
+            "acmg": "3",
+            "census": "",
+            "status_cnv": [
+              "DEL (2)"
+            ]
+          }
+        ],
+        "cnvs": [
+          {
+            "_id": "9_21134886_26424577__1_split_23",
+            "coord": {
+              "start_contig_pos_num": 9021134886,
+              "end_contig_pos_num": 9026424577
+            },
+            "caller": [
+              "facet"
+            ],
+            "contig": [
+              9
+            ],
+            "start": 21134886,
+            "end": 26424577,
+            "length": 5289691,
+            "type": "DEL",
+            "genes": [
+              "CDKN2A",
+              "CDKN2B",
+              "MTAP"
+            ],
+            "census": [
+              "tier 1|TSG",
+              "-",
+              "-"
+            ],
+            "nbcopy": 0,
+            "genotype": "0/0",
+            "facet_purity": "0.3815",
+            "facet_infered_ploidy": "2.7163"
+          },
+          {
+            "_id": "20_55913724_63084507__1_split_91",
+            "coord": {
+              "start_contig_pos_num": 20055913724,
+              "end_contig_pos_num": 20063084507
+            },
+            "caller": [
+              "facet"
+            ],
+            "contig": [
+              20
+            ],
+            "start": 55913724,
+            "end": 63084507,
+            "length": 7170783,
+            "type": "DUP",
+            "genes": [
+              "GNAS",
+              "AURKA"
+            ],
+            "census": [
+              "tier 1|oncogene",
+              "-"
+            ],
+            "nbcopy": 8,
+            "genotype": "6/2",
+            "facet_purity": "0.3815",
+            "facet_infered_ploidy": "2.7163"
+          },
+          {
+            "_id": "20_63084896_64327605__1_split_61",
+            "coord": {
+              "start_contig_pos_num": 20063084896,
+              "end_contig_pos_num": 20064327605
+            },
+            "caller": [
+              "facet"
+            ],
+            "contig": [
+              20
+            ],
+            "start": 63084896,
+            "end": 64327605,
+            "length": 1242709,
+            "type": "DUP",
+            "genes": [
+              "PTK6"
+            ],
+            "census": [
+              "tier 1|oncogene,TSG"
+            ],
+            "nbcopy": 7,
+            "genotype": "5/2",
+            "facet_purity": "0.3815",
+            "facet_infered_ploidy": "2.7163"
+          },
+          {
+            "_id": "6_130648_865169__1_split_17",
+            "coord": {
+              "start_contig_pos_num": 6000130648,
+              "end_contig_pos_num": 6000865169
+            },
+            "caller": [
+              "facet"
+            ],
+            "contig": [
+              6
+            ],
+            "start": 130648,
+            "end": 865169,
+            "length": 734521,
+            "type": "DUP",
+            "genes": [
+              "IRF4"
+            ],
+            "census": [
+              "tier 1|oncogene,TSG,fusion"
+            ],
+            "nbcopy": 7,
+            "genotype": "5/2",
+            "facet_purity": "0.3815",
+            "facet_infered_ploidy": "2.7163"
+          },
+          {
+            "_id": "11_77264761_79652413__1_split_24",
+            "coord": {
+              "start_contig_pos_num": 11077264761,
+              "end_contig_pos_num": 11079652413
+            },
+            "caller": [
+              "facet"
+            ],
+            "contig": [
+              11
+            ],
+            "start": 77264761,
+            "end": 79652413,
+            "length": 2387652,
+            "type": "DUP",
+            "genes": [
+              "GAB2",
+              "PAK1"
+            ],
+            "census": [
+              "",
+              "-"
+            ],
+            "nbcopy": 12,
+            "genotype": "11/1",
+            "facet_purity": "0.3815",
+            "facet_infered_ploidy": "2.7163"
+          }
+        ],
+        "commentaires": "x",
+        "conclusion": "x",
+        "metadata": {
+          "facet_infered_ploidy": "2.7163",
+          "facet_purity": "0.3815"
+        },
+        "nb_samples": 3,
+        "qc_infos": {
+          "hrd": {
+            "loh": 10,
+            "lst": 23,
+            "sum": 63,
+            "tai": 30
+          },
+          "msi": 0.009999999776482582,
+          "tmb": 1.7300000190734863,
+          "qc_values_cancer": {
+            "pct_bases_above_150_wes_t": 90.61138124228788,
+            "pct_bases_above_20_wgs_c": 95.8181184835213,
+            "pct_bases_above_30_wgs_t": 96.5131667135166,
+            "pct_bases_above_150_wes_c": null,
+            "pct_bases_above_20_wes_c": null,
+            "pct_bases_above_30_wes_c": null,
+            "pct_bases_above_40_wgs_t": null,
+            "pct_bases_above_30_wgs_c": 86.65107692297772,
+            "pct_bases_above_100_wes_t": 95.9726793847937,
+            "pct_bases_above_100_wes_c": null,
+            "pct_callable_wes_c": null,
+            "pct_callable_wes_t": 95.9839773313315,
+            "pct_callable_wgs_c": 91.06419088706136,
+            "pct_callable_wgs_t": 91.1261159325397,
+            "pct_callable_wts": null,
+            "mean_coverage_wgs_c": 38.60951367784702,
+            "mean_coverage_wes_c": null,
+            "mean_coverage_wes_t": 317.6269839810158,
+            "mean_coverage_wgs_t": 93.15836937442148,
+            "mean_coverage_wts": null,
+            "q30_bases_wes_c": null,
+            "q30_bases_wes_t": 23729553244,
+            "q30_bases_wgs_c": 115881973594,
+            "q30_bases_wgs_t": 285008143723,
+            "q30_bases_wts": 29253338095,
+            "bed_wts": null,
+            "bed_wes_c": null,
+            "bed_wes_t": "Twist_Exome_v2_plus_Comprehensive_Exome_Spike-in_Padding_0",
+            "bed_wgs_c": null,
+            "bed_wgs_t": null
+          },
+          "qc_values_mr": null,
+          "cellularite_inferee": 0.381495662568165,
+          "ploidie_inferee": 2.7163366882982
+        }
+      }
+    }
+  ],
+  "hpos": [],
+  "orphas": [],
+  "commentaires": [],
+  "donneesMed": [
+    {
+      "type": "ficheRcp",
+      "lib": "Fiche RCP",
+      "filename": "XXXX - fiche RCP.pdf",
+      "filetype": "application/pdf",
+      "file_oid": "67cecdfdb4cffa55e8706ffe"
+    },
+    {
+      "type": "anatomopathologiques",
+      "lib": "Anatomopathologiques",
+      "filename": "XXXX - CRA.pdf",
+      "filetype": "application/pdf",
+      "file_oid": "67cecdfdb4cffa55e8707000"
+    },
+    {
+      "type": "génétique",
+      "lib": "Génétique",
+      "filename": "XXXX - ADN circulant.pdf",
+      "filetype": "application/pdf",
+      "file_oid": "67ced14db4cffa55e8707013"
+    }
+  ],
+  "investigationsMed": [],
+  "isInvestigationNeeded": true,
+  "status": "COMPLETED",
+  "date_creation": 1741606397865,
+  "prescripteur": "4031575",
+  "date": 1745570955298,
+  "pid_crc": "66EFA9",
+  "pid": 26351,
+  "date_last_modified": 1745570955298,
+  "date_status_wait_rcp": 1741606400714,
+  "centreQEX_Id": "5e71fd1defaa9b6f5a729fb7",
+  "exam_key": "wesrnaseq",
+  "membreRCP": "541351",
+  "date_debut_wait_consent": 1741609275924,
+  "notifications_reclamation_validation": [
+    {
+      "date_envoi_reclamation": 1741861872432,
+      "from": "7058886",
+      "destinataires": [
+        "xxx@aphp.fr"
+      ]
+    }
+  ],
+  "dateValidationDossier": 1741940681201,
+  "resultats": [
+    {
+      "type": "cr_biologique",
+      "lib": "Compte rendu biologique initial",
+      "filename": "CR_SeqOIA_Analyse_Génomique_Tumorale-66EFA9.pdf",
+      "filetype": "application/pdf",
+      "date_resultats": 1745498226616,
+      "MembreLMG": "541351",
+      "file_oid": "680a30721472182bb00d82f8"
+    }
+  ],
+  "isCentreQualifieurValidatedPrescription": "oui",
+  "needValidationAccueilLMGToPassOnStateAnalyse": false,
+  "date_debut_wait_analyse": 1742470599863,
+  "date_debut_wait_lmg": 1744130714431,
+  "cr_technique": true,
+  "prescription_is_hidden_on_gleaves": null,
+  "prescription_hidden_is_init_by_gleaves": true,
+  "date_when_gleaves_hide_prescription": 1744130714431,
+  "analysis_info": {
+    "analysis_ID": "55014",
+    "date_fin_analyse": "08042025",
+    "run_id": {
+      "WGS-T": "250328_A01293_0904_AH5YTTDSXF",
+      "WGS-C": "250321_A01293_0899_BH72G2DSXF",
+      "WTS": "250331_A01554_0741_AHVJNKDRX5",
+      "WES-T": "250331_A01554_0742_BHVKGMDRX5"
+    }
+  },
+  "pipeline_info": {
+    "gleaves_owner": {
+      "login": "543782",
+      "name": "xxx",
+      "date": 1744384291408
+    }
+  },
+  "hasDateLastModified": 1,
+  "hasDateCreation": 0,
+  "nb_reclamation": 1,
+  "membreLMG": "541351",
+  "date_resultats": 1745498227046,
+  "date_cloture": 1745498322775,
+  "is_priority": false,
+  "dossier_cloture": {
+    "is_prelevement_needed": false,
+    "is_alteration": true,
+    "is_snv": true,
+    "is_cnv": true,
+    "is_fusion": false,
+    "is_tmb": false,
+    "is_msi": false,
+    "is_hrd": true,
+    "is_signature_mutationnelle": false,
+    "is_alteration_pertinentes_not_identified_previously": true,
+    "is_rcp_discussed": true,
+    "resulat_rendu_rcp": {
+      "precision_du_diagnostic_initial": false,
+      "changement_de_diagnostic": false,
+      "theranostique": true,
+      "is_none": false
+    },
+    "lmg_name_en_charge": {
+      "login": "xxx",
+      "nom": "XXXxxx"
+    },
+    "biologistes_signataires": [
+      {
+        "login": "xxx",
+        "nom": "XXXXxxxx"
+      },
+      {
+        "login": "xxx",
+        "nom": "XXXXXxxxx"
+      }
+    ]
+  },
+  "is_cr_readed": true
+}

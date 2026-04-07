@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auragen.fr/schemas/meta_libraries.jsd",
+  "$defs": {
+    "libid": {
+      "type": "string",
+      "pattern": "^LIB(\\d{8}|\\d{10})$"
+    },
+    "vernum": {
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)+(a|b)?$"
+    },
+    "component": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "description": "software category",
+          "type": "string"
+        },
+        "name": {
+          "description": "software name",
+          "type": "string"
+        },
+        "version": {
+          "description": "software version",
+          "$ref": "#/$defs/vernum"
+        },
+        "status": {
+          "description": "software execution status",
+          "type": "string",
+          "pattern": "^(success|failure)$"
+        }
+      },
+      "required": ["category", "name", "version", "status"],
+      "additionalProperties": false
+    },
+    "workflow": {
+      type: "object",
+      "properties": {
+        "name": {
+          "description": "workflow name",
+          "type": "string"
+        },
+        "version": {
+          "description": "workflow version",
+          "$ref": "#/$defs/vernum"
+        },
+        "components" : {
+          "description": "array of software components",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/component"
+          }
+        }
+      },
+      "required": ["name", "version", "components"],
+      "additionalProperties": false
+    }
+  },
+  "title": "software metadata KC/MR/OC",
+  "description": "auragen KC/MR/OC libraries metadata",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "file description",
+      "type": "string"
+    },
+    "version": {
+      "description": "schema version number",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "case_id": {
+      "description": "case identifier",
+      "type": "string",
+      "pattern": "^(MR|OC|KC)-\\d{7}$"
+    },
+    "libraries": {
+      "description": "array of libraries",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lib_id": {
+            "description": "identifier of library",
+            "$ref": "#/$defs/libid"
+          },
+          "run_workflows": {
+            "description": "array of run mode workflows",
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/workflow"
+            }
+          }
+        },
+        "required": ["lib_id", "run_workflows"],
+        "additionalProperties": false
+      }
+    },
+    "patient_workflows": {
+      "description": "array of patient mode workflows",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/workflow"
+      }
+    }
+  },
+  "required": ["description", "version", "case_id", "libraries", "patient_workflows"],
+  "additionalProperties": false
+}

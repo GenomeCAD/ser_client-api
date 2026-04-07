@@ -104,7 +104,7 @@ def institution():
 def generator(institution):
     profiles_dir = (
         Path(ser_client_api.__file__).parent
-        / "hl7v2" / "profiles" / "gipcad" / "v000_compiled"
+        / "hl7v2" / "gipcad" / "profiles" / "v000_compiled"
     )
     return HL7v2Generator(
         profile_path=str(profiles_dir / "oru_r01_lab36"),

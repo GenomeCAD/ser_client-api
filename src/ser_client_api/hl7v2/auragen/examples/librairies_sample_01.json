@@ -1,0 +1,63 @@
+{
+  "description": "auragen libraries metadata example",
+  "version": "1.0",
+  "case_id": "KC-0001234",
+  "libraries": [
+    {
+      "lib_id": "LIB20240001",
+      "seq_type": "wgs",
+      "sample_type": "tumour",
+      "sample_tissue": "organ",
+      "sample_storage": "ffpe",
+      "extraction": {
+        "instrument": "QIAsymphony",
+        "kit": "QIAamp DNA FFPE Tissue Kit"
+      },
+      "qualification": {
+        "instrument": "Agilent TapeStation",
+        "kit": "Genomic DNA ScreenTape",
+        "din": "7.2",
+        "rin": null,
+        "gqn": "6.8",
+        "rqn": null
+      },
+      "quantification": {
+        "instrument": "Qubit",
+        "kit": "Qubit dsDNA HS Assay",
+        "concentration": "45 ng/µl"
+      },
+      "preplib": {
+        "instrument": "Illumina NeoPrep",
+        "kit": "TruSeq DNA PCR-Free"
+      }
+    },
+    {
+      "lib_id": "LIB20240002",
+      "seq_type": "wgs",
+      "sample_type": "normal",
+      "sample_tissue": "blood",
+      "sample_storage": "frozen",
+      "extraction": {
+        "instrument": "QIAsymphony",
+        "kit": "QIAamp DNA Blood Mini Kit"
+      },
+      "qualification": {
+        "instrument": "Nanodrop",
+        "kit": null,
+        "din": null,
+        "rin": null,
+        "gqn": null,
+        "rqn": null
+      },
+      "quantification": {
+        "instrument": "Qubit",
+        "kit": "Qubit dsDNA BR Assay",
+        "concentration": "60 ng/µl"
+      },
+      "preplib": {
+        "instrument": "Illumina NeoPrep",
+        "kit": "TruSeq DNA PCR-Free"
+      }
+    }
+  ]
+}

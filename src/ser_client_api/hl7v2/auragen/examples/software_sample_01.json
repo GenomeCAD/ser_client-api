@@ -1,0 +1,73 @@
+{
+  "description": "auragen software metadata example",
+  "version": "1.0",
+  "case_id": "KC-0001234",
+  "libraries": [
+    {
+      "lib_id": "LIB20240001",
+      "run_workflows": [
+        {
+          "name": "WGS Germline Pipeline",
+          "version": "2.3.1",
+          "components": [
+            {
+              "category": "aligner",
+              "name": "bwa-mem2",
+              "version": "2.2.1",
+              "status": "success"
+            },
+            {
+              "category": "variant-caller",
+              "name": "GATK HaplotypeCaller",
+              "version": "4.5.0.0",
+              "status": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "LIB20240002",
+      "run_workflows": [
+        {
+          "name": "WGS Somatic Pipeline",
+          "version": "1.9.0a",
+          "components": [
+            {
+              "category": "aligner",
+              "name": "bwa-mem2",
+              "version": "2.2.1",
+              "status": "success"
+            },
+            {
+              "category": "variant-caller",
+              "name": "Mutect2",
+              "version": "4.5.0.0",
+              "status": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "patient_workflows": [
+    {
+      "name": "Clinical Interpretation Workflow",
+      "version": "3.1.0b",
+      "components": [
+        {
+          "category": "annotation",
+          "name": "VEP",
+          "version": "111.0",
+          "status": "success"
+        },
+        {
+          "category": "interpretation",
+          "name": "Auragen Expert System",
+          "version": "1.4.2",
+          "status": "success"
+        }
+      ]
+    }
+  ]
+}

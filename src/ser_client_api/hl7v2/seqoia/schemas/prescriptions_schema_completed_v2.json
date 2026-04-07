@@ -1,0 +1,651 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Spice - prescriptions — describe",
+  "type": "object",
+  "properties": {
+    "patients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "patient": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "nom": {
+                "type": "string"
+              },
+              "prenom": {
+                "type": "string"
+              },
+              "nom_naissance": {
+                "type": "string"
+              },
+              "sexe": {
+                "type": "string"
+              },
+              "date_naissance": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "lien": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "atteint": {
+            "type": "boolean"
+          },
+          "is_data_reusable_for_research": {
+            "type": "boolean"
+          },
+          "file_oid": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "filetype": {
+            "type": "string"
+          },
+          "dateConsent": {
+            "type": "number",
+            "format": "epoch_ms"
+          },
+          "date_prelevement": {
+            "type": "number",
+            "format": "epoch_ms"
+          },
+          "type_prelevement_primaire": {
+            "type": "string"
+          },
+          "id_anon": {
+            "type": "string"
+          },
+          "accueilLMG": {
+            "type": "string"
+          },
+          "date_reception": {
+            "type": "number",
+            "format": "epoch_ms"
+          },
+          "nombre_de_tube_sang": {
+            "type": "number"
+          },
+          "date_when_conformity_is_indicate": {
+            "type": "number",
+            "format": "epoch_ms"
+          },
+          "date_when_no_conformity_is_indicate": {
+            "type": "number",
+            "format": "epoch_ms"
+          },
+          "prelevement_is_no_conform": {
+            "type": "boolean"
+          },
+          "id_no_conformity": {
+            "type": "string"
+          },
+          "no_conformity_data": {
+            "type": "object",
+            "properties": {
+              "no_conformity": {
+                "type": "object",
+                "properties": {
+                  "is_no_conformity_blocking": {
+                    "type": "boolean"
+                  },
+                  "is_nc_donnee_demographique": {
+                    "type": "boolean"
+                  },
+                  "is_nc_consentement": {
+                    "type": "boolean"
+                  },
+                  "list_of_no_conformities": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "conformity_info": {
+                          "type": "object",
+                          "properties": {
+                            "id_non_conformite": {
+                              "type": "string"
+                            },
+                            "nc_name": {
+                              "type": "string"
+                            },
+                            "type_non_conformite": {
+                              "type": "string"
+                            },
+                            "date_when_nc_is_register": {
+                              "type": "number",
+                              "format": "epoch_ms"
+                            }
+                          }
+                        },
+                        "nc_commentaires": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "commentaire": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "object",
+                                "properties": {
+                                  "login": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "date": {
+                                "type": "number",
+                                "format": "epoch_ms"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "count_of_nc_conformity": {
+                    "type": "number"
+                  },
+                  "date_register_of_no_conformity": {
+                    "type": "number",
+                    "format": "epoch_ms"
+                  }
+                }
+              },
+              "is_prescription_not_validated": {
+                "type": "boolean"
+              },
+              "user_who_noted_non_conformity": {
+                "type": "object",
+                "properties": {
+                  "login": {
+                    "type": "string"
+                  },
+                  "nom": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "sample_is_excluded": {
+            "type": "boolean"
+          },
+          "resultat_compte_rendu_gleaves": {
+            "type": "object",
+            "properties": {
+              "variants": {
+                "type": "array",
+                "items": {}
+              },
+              "cnvs": {
+                "type": "array",
+                "items": {}
+              },
+              "expansions": {
+                "type": "array",
+                "items": {}
+              },
+              "commentaires": {
+                "type": "string"
+              },
+              "conclusion": {
+                "type": "string"
+              },
+              "nb_samples": {
+                "type": "number"
+              },
+              "qc_infos": {
+                "type": "object",
+                "properties": {
+                  "hrd": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "msi": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tmb": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "qc_values_cancer": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "qc_values_mr": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "pct_bases_above_20": {
+                          "type": "number"
+                        },
+                        "mean_coverage": {
+                          "type": "number"
+                        },
+                        "pct_callable": {
+                          "type": "number"
+                        },
+                        "q30_bases": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "cellularite_inferee": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "ploidie_inferee": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "hpos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "lib": {
+            "type": "object",
+            "properties": {
+              "fr": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "orphas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "lib": {
+            "type": "string"
+          },
+          "hpos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "freq": {
+                  "type": "number"
+                },
+                "freq_str": {
+                  "type": "string"
+                },
+                "lib": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "commentaires": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "commentaire": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "login": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "date": {
+            "type": "number",
+            "format": "epoch_ms"
+          }
+        }
+      }
+    },
+    "donneesMed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "lib": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "filetype": {
+            "type": "string"
+          },
+          "file_oid": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "COMPLETED"
+      ]
+    },
+    "prescripteur": {
+      "type": "string"
+    },
+    "date": {
+      "type": "number",
+      "format": "epoch_ms"
+    },
+    "pid_crc": {
+      "type": "string"
+    },
+    "pid": {
+      "type": "number"
+    },
+    "date_status_wait_rcp": {
+      "type": "number",
+      "format": "epoch_ms"
+    },
+    "exam_key": {
+      "type": "string"
+    },
+    "membreRCP": {
+      "type": "string"
+    },
+    "dateConsent": {
+      "type": "number",
+      "format": "epoch_ms"
+    },
+    "preindication": {
+      "type": "object",
+      "properties": {
+        "catkey": {
+          "type": "string"
+        },
+        "catname": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rcp_id": {
+          "type": "string"
+        },
+        "rcp_nom": {
+          "type": "string"
+        },
+        "name_old": {
+          "type": "string"
+        }
+      }
+    },
+    "date_resultats": {
+      "type": "number",
+      "format": "epoch_ms"
+    },
+    "membreLMG": {
+      "type": "string"
+    },
+    "resultats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "lib": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "filetype": {
+            "type": "string"
+          },
+          "file_oid": {
+            "type": "string"
+          },
+          "AccueilLMG": {
+            "type": "string"
+          },
+          "date_resultats": {
+            "type": "number",
+            "format": "epoch_ms"
+          }
+        }
+      }
+    },
+    "date_cloture": {
+      "type": "number",
+      "format": "epoch_ms"
+    },
+    "dossier_cloture": {
+      "type": "object",
+      "properties": {
+        "is_nc_orphanet_and_hpo": {
+          "type": "boolean"
+        },
+        "is_nc_donneeMed": {
+          "type": "boolean"
+        },
+        "is_nc_orphas_up": {
+          "type": "boolean"
+        },
+        "is_nc_donneesMed_up": {
+          "type": "boolean"
+        },
+        "is_post_prescription_discussed": {
+          "type": "boolean"
+        },
+        "post_prescription_comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_ricb_discussed": {
+          "type": "boolean"
+        },
+        "ricb_comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_concluant": {
+          "type": "boolean"
+        },
+        "variants": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {}
+        },
+        "variant_structuraux": {
+          "type": "array",
+          "items": {}
+        },
+        "is_confirmation_variants": {
+          "type": "boolean"
+        },
+        "is_confirmation_snv": {
+          "type": "boolean"
+        },
+        "is_variant_causal": {
+          "type": "boolean"
+        },
+        "is_variant_causal_phenotype": {
+          "type": "boolean"
+        },
+        "non_conclusif_info": {
+          "type": "object",
+          "properties": {
+            "is_variant_identified": {
+              "type": "boolean"
+            },
+            "is_vsi_interet": {
+              "type": "boolean"
+            },
+            "is_investigation_biologique_complementaire": {
+              "type": "boolean"
+            },
+            "investigation_biologique_complementaire": {
+              "type": "object",
+              "properties": {
+                "is_analyse_de_segregation": {
+                  "type": "boolean"
+                },
+                "is_test_fonctionnel": {
+                  "type": "boolean"
+                },
+                "is_other_investigation": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "investigation_clinique_complementaire": {
+              "type": "object",
+              "properties": {
+                "is_investigation_clinique_complementaire": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "lmg_name_en_charge": {
+          "type": "object",
+          "properties": {
+            "login": {
+              "type": "string"
+            },
+            "nom": {
+              "type": "string"
+            }
+          }
+        },
+        "biologistes_signataires": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "login": {
+                "type": "string"
+              },
+              "nom": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "cr_technique": {
+      "type": "boolean"
+    },
+    "prescripteurs_old": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "prescripteur_from": {
+            "type": "string"
+          },
+          "prescripteur_destination": {
+            "type": "string"
+          },
+          "date_transfert": {
+            "type": "number",
+            "format": "epoch_ms"
+          }
+        }
+      }
+    },
+    "date_last_modified": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hasDateLastModified": {
+      "type": "number"
+    },
+    "hasDateCreation": {
+      "type": "number"
+    },
+    "nb_reclamation": {
+      "type": "number"
+    }
+  }
+}

@@ -2,9 +2,12 @@
 SeqOIA local data parser — GLeaves JSON format.
 """
 
+import importlib.resources
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+
+import jsonschema
 
 from ser_client_api.hl7v2.domain_models import (
     CareTeamData,
@@ -44,7 +47,24 @@ class SeqoiaParser:
     Isolates business models from external JSON structure changes.
     """
 
+    _schema = None  # cached at class level
+
+    @classmethod
+    def _get_schema(cls) -> Dict[str, Any]:
+        if cls._schema is None:
+            schema_file = (
+                importlib.resources.files("ser_client_api.hl7v2.seqoia")
+                / "schemas"
+                / "prescriptions_schema_completed_v2.json"
+            )
+            cls._schema = json.loads(schema_file.read_text(encoding="utf-8"))
+        return cls._schema
+
     def parse(self, json_data: Dict[str, Any]) -> CompositionData:
+        try:
+            jsonschema.validate(instance=json_data, schema=self._get_schema())
+        except jsonschema.ValidationError as e:
+            raise ValueError(f"SeqOIA JSON schema validation failed: {e.message}")
         try:
             patient = self._parse_patient(json_data)
             rcp_data = self._parse_rcp_data(json_data)

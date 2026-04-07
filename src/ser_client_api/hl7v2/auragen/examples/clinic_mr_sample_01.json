@@ -1,0 +1,51 @@
+{
+  "description": "auragen MR case example",
+  "version": "1.0",
+  "case_id": "MR-0000456",
+  "indication_code": "IMR0123",
+  "hpo_terms": [
+    "HP:0001250",
+    "HP:0004322"
+  ],
+  "index_case": "LIB20240123",
+  "individuals": [
+    {
+      "lib_id": "LIB20240123",
+      "sex": "female",
+      "status": "affected",
+      "sample_type": "blood",
+      "family": {
+        "link": "index-case"
+      },
+      "birth_year": 2005,
+      "parent1": "LIB20240124",
+      "parent2": "LIB20240125"
+    },
+    {
+      "lib_id": "LIB20240124",
+      "sex": "male",
+      "status": "unaffected",
+      "sample_type": "blood",
+      "family": {
+        "link": "parent",
+        "branch": "paternal"
+      },
+      "birth_year": 1978,
+      "parent1": null,
+      "parent2": null
+    },
+    {
+      "lib_id": "LIB20240125",
+      "sex": "female",
+      "status": "unaffected",
+      "sample_type": "blood",
+      "family": {
+        "link": "parent",
+        "branch": "maternal"
+      },
+      "birth_year": 1980,
+      "parent1": null,
+      "parent2": null
+    }
+  ]
+}
