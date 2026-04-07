@@ -25,10 +25,10 @@ from ser_client_api.hl7v2.domain_models import (
 
 def _get_required_field(data: Dict[str, Any], field: str) -> Any:
     if field not in data:
-        raise KeyError(f"Missing required field: '{field}'")
+        raise ValueError(f"Missing required field: '{field}'")
     value = data[field]
     if not value:
-        raise KeyError(f"Required field '{field}' is empty or None")
+        raise ValueError(f"Required field '{field}' is empty or None")
     return value
 
 
@@ -89,8 +89,8 @@ class SeqoiaParser:
                 next_of_kin=next_of_kin_data,
             )
 
-        except KeyError as e:
-            raise ValueError(f"Missing required JSON field: {e}")
+        except ValueError:
+            raise
         except Exception as e:
             raise ValueError(f"Failed to parse GLeaves JSON: {e}")
 
