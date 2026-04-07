@@ -111,7 +111,6 @@ class SeqoiaParser:
         main_patient_id = _get_required_field(patient_id_obj, "value")
         main_patient_sex = _get_required_field(main_patient_info, "sexe")
 
-        # date_prelevement is at the entry level, not inside the patient sub-object
         date_prelevement_ms = _get_required_field(main_patient_entry, "date_prelevement")
         date_prelevement = datetime.fromtimestamp(date_prelevement_ms / 1000, tz=timezone.utc)
 
