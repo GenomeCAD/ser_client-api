@@ -60,11 +60,15 @@ class SeqoiaParser:
             cls._schema = json.loads(schema_file.read_text(encoding="utf-8"))
         return cls._schema
 
-    def parse(self, json_data: Dict[str, Any]) -> CompositionData:
+    def validate(self, json_data: Dict[str, Any]) -> None:
+        """Validate json_data against the SeqOIA JSON schema."""
         try:
             jsonschema.validate(instance=json_data, schema=self._get_schema())
         except jsonschema.ValidationError as e:
             raise ValueError(f"SeqOIA JSON schema validation failed: {e.message}")
+
+    def parse(self, json_data: Dict[str, Any]) -> CompositionData:
+        self.validate(json_data)
         try:
             patient = self._parse_patient(json_data)
             rcp_data = self._parse_rcp_data(json_data)
