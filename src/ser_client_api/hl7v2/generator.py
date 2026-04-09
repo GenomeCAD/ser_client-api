@@ -51,6 +51,11 @@ class HL7v2Generator:
             "description": "VCF",
             "system": "http://edamontology.org",
         },
+        "vcf.gz": {
+            "code": "format_3016",
+            "description": "VCF",
+            "system": "http://edamontology.org",
+        },
         "bam": {
             "code": "format_2572",
             "description": "BAM",
@@ -881,9 +886,11 @@ class HL7v2Generator:
         :rtype: Tuple[str, str, str]
         :raises ValueError: If file extension is not supported
         """
-        # Handle compound extension .tar.gz first
+        # Handle compound extensions first (longest match wins)
         if filename.lower().endswith(".tar.gz"):
             extension = "tar.gz"
+        elif filename.lower().endswith(".vcf.gz"):
+            extension = "vcf.gz"
         else:
             # Get single extension
             parts = filename.lower().split(".")
