@@ -99,6 +99,45 @@ class TestSchemaCaching:
         assert SeqoiaParser._schema is schema_after_first
 
 
+class TestTrioParsing:
+    """id_anon extraction and folder_name resolution for trio prescriptions."""
+
+    def test_main_patient_id_anon_parsed(self, minimal_prescription_json):
+        composition = SeqoiaParser().parse(minimal_prescription_json)
+        assert composition.patient.id_anon == "TESTID"
+
+    def test_nok_father_id_anon_parsed(self, minimal_prescription_json):
+        composition = SeqoiaParser().parse(minimal_prescription_json)
+        father = next(n for n in composition.next_of_kin if n.relationship_code == "FTH")
+        assert father.id_anon == "TESTID2"
+
+    def test_nok_mother_id_anon_parsed(self, minimal_prescription_json):
+        composition = SeqoiaParser().parse(minimal_prescription_json)
+        mother = next(n for n in composition.next_of_kin if n.relationship_code == "MTH")
+        assert mother.id_anon == "TESTID3"
+
+    def test_patient_folder_name_uses_id_anon(self, minimal_prescription_json):
+        composition = SeqoiaParser().parse(minimal_prescription_json)
+        assert composition.patient.folder_name == "TESTID"
+        assert composition.patient.folder_name != "DUPONT_MARIE"
+
+    def test_nok_folder_name_uses_id_anon(self, minimal_prescription_json):
+        composition = SeqoiaParser().parse(minimal_prescription_json)
+        father = next(n for n in composition.next_of_kin if n.relationship_code == "FTH")
+        assert father.folder_name == "TESTID2"
+        assert father.folder_name != "DUPONT_JEAN"
+
+    def test_folder_name_falls_back_to_family_given_when_no_id_anon(self):
+        from ser_client_api.hl7v2.domain_models import RelatedPersonData
+        nok = RelatedPersonData(set_id=1, relationship_code="FTH", family_name="DUPONT", given_name="JEAN")
+        assert nok.folder_name == "DUPONT_JEAN"
+
+    def test_folder_name_returns_none_when_no_id_anon_and_no_names(self):
+        from ser_client_api.hl7v2.domain_models import RelatedPersonData
+        nok = RelatedPersonData(set_id=1, relationship_code="FTH")
+        assert nok.folder_name is None
+
+
 class TestRealExamples:
 
     @pytest.mark.parametrize("filename", [

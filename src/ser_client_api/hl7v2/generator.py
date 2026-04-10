@@ -8,7 +8,7 @@ import hashlib
 import os
 import uuid
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import List, Tuple
 
 from hl7apy import load_message_profile
 from hl7apy.consts import VALIDATION_LEVEL
@@ -47,6 +47,11 @@ class HL7v2Generator:
             "system": "LN",
         },
         "vcf": {
+            "code": "format_3016",
+            "description": "VCF",
+            "system": "http://edamontology.org",
+        },
+        "vcf.gz": {
             "code": "format_3016",
             "description": "VCF",
             "system": "http://edamontology.org",
@@ -120,48 +125,66 @@ class HL7v2Generator:
 
         self._populate_sft(msg)
 
-        # Populate PID segment
+        nok_list = parsed_report_data.next_of_kin or []
+
+        pr_main_patient = msg.add_group("ORU_R01_PATIENT_RESULT")
+
         self._populate_pid(
-            msg, parsed_report_data.patient, parsed_report_data.report_id
+            pr_main_patient, parsed_report_data.patient, parsed_report_data.report_id
         )
 
-        # Populate CON segment (only if consent for research )
         if (
             parsed_report_data.consent
             and parsed_report_data.consent.is_data_reusable_for_research
         ):
-            self._populate_con(msg, parsed_report_data.consent)
+            self._populate_con(pr_main_patient, parsed_report_data.consent)
 
-        # Populate NK1 segments (Next of Kin: father/mother)
-        if parsed_report_data.next_of_kin:
-            self._populate_nk1(msg, parsed_report_data.next_of_kin)
+        if nok_list:
+            self._populate_nk1(pr_main_patient, nok_list)
 
-        # preindication
         self._populate_pv1(
-            msg,
+            pr_main_patient,
             parsed_report_data.analysis,
             parsed_report_data.preindication,
             parsed_report_data.patient,
             parsed_report_data.results,
         )
 
-        # Populate OBX segments with file references (grouped by individual)
         self._populate_obx_files(
-            msg,
+            pr_main_patient,
             files_directory,
             parsed_report_data.timing.end,
             parsed_report_data.patient,
-            parsed_report_data.next_of_kin,
         )
 
-        # # Populate PRT segment
         self._populate_prt(
-            msg,
+            pr_main_patient,
             parsed_report_data.rcp,
             parsed_report_data.person,
             parsed_report_data.analysis,
             parsed_report_data.timing,
         )
+
+        for nok in nok_list:
+            pr_nok = msg.add_group("ORU_R01_PATIENT_RESULT")
+            self._populate_pid_for_nok(pr_nok, nok, parsed_report_data.report_id)
+            self._populate_nk1_for_nok(
+                pr_nok, nok, parsed_report_data.patient, nok_list
+            )
+            self._populate_pv1(
+                pr_nok,
+                parsed_report_data.analysis,
+                parsed_report_data.preindication,
+                parsed_report_data.patient,
+                parsed_report_data.results,
+            )
+            self._populate_obx_nok_files(
+                pr_nok,
+                files_directory,
+                parsed_report_data.timing.end,
+                nok,
+            )
+
         self.validate_with_profile(msg)
         return msg.to_er7()
 
@@ -178,7 +201,7 @@ class HL7v2Generator:
 
     def _populate_pv1(
         self,
-        msg: Message,
+        patient_result,
         analysis_data: ProcedureData,
         preindication_data: ConditionData,
         patient: PatientData,
@@ -186,8 +209,7 @@ class HL7v2Generator:
     ) -> None:
         """Populate PV1 segment with patient visit information.
 
-        :param msg: HL7v2 message to populate
-        :type msg: Message
+        :param patient_result: PATIENT_RESULT group to populate
         :param analysis_data: Analysis information from business model
         :type analysis_data: ProcedureData
         :param preindication_data: Preindication information from business model
@@ -206,7 +228,7 @@ class HL7v2Generator:
         date_prelevement = patient.date_prelevement
 
         # Navigate to correct HL7v2 hierarchy for PV1 segment
-        visit_group = msg.oru_r01_patient_result.oru_r01_patient.oru_r01_visit
+        visit_group = patient_result.oru_r01_patient.oru_r01_visit
 
         visit_group.pv1.set_id_pv1 = "1"
         visit_group.pv1.patient_class = "I"
@@ -300,7 +322,7 @@ class HL7v2Generator:
             f"^1.2.250.1.710.1.2.1^ISO"
         )
 
-    def _populate_pid(self, msg: Message, patient: PatientData, report_id: str) -> None:
+    def _populate_pid(self, patient_result, patient: PatientData, report_id: str) -> None:
         """Populate PID segment conforming to oru_r01_lab36.xml profile constraints.
 
         PID fields according to oru_r01_lab36.xml profile specification:
@@ -313,8 +335,7 @@ class HL7v2Generator:
         PID-7: Date/Time of Birth - Required but may be Empty (Usage="RE")
         PID-8: Administrative Sex - REQUIRED (Usage="R")
 
-        :param msg: HL7v2 message to populate
-        :type msg: Message
+        :param patient_result: PATIENT_RESULT group to populate
         :param patient: Business model patient data
         :type patient: PatientData
         :return: None
@@ -323,7 +344,7 @@ class HL7v2Generator:
         """
 
         # Navigate to correct HL7v2 hierarchy for PID segment
-        patient_group = msg.oru_r01_patient_result.oru_r01_patient
+        patient_group = patient_result.oru_r01_patient
 
         # PID-1: Set ID
         patient_group.pid.set_id_pid = str(patient.set_id)
@@ -334,7 +355,7 @@ class HL7v2Generator:
         )
         # PID.5 - Patient Name
         patient_group.pid.patient_name = (
-            f"{patient.patient_given_name}" f"^{patient.patient_family_name}^^^^^L"
+            f"{patient.patient_family_name}^{patient.patient_given_name}^^^^^L"
         )
         # PID-7: Date/Time of Birth
         patient_group.pid.date_time_of_birth = patient.hl7_birth_date
@@ -354,21 +375,20 @@ class HL7v2Generator:
         # PID.32 - Identity Reliability Code
         patient_group.pid.identity_reliability_code = "PROV"
 
-    def _populate_con(self, msg: Message, consent: ConsentData) -> None:
+    def _populate_con(self, patient_result, consent: ConsentData) -> None:
         """Populate CON segment
 
         Only called when is_data_reusable_for_research == True.
         CON segment follows PID in the patient group hierarchy.
 
-        :param msg: HL7v2 message to populate
-        :type msg: Message
+        :param patient_result: PATIENT_RESULT group to populate
         :param consent: Consent data from business model
         :type consent: ConsentData
         :return: None
         :rtype: None
         """
         # Navigate to patient group (CON is after PID in profile)
-        patient_group = msg.oru_r01_patient_result.oru_r01_patient
+        patient_group = patient_result.oru_r01_patient
 
         # Add CON segment
         con = patient_group.add_segment("CON")
@@ -423,21 +443,20 @@ class HL7v2Generator:
         con.con_25 = "7"
 
     def _populate_nk1(
-        self, msg: Message, next_of_kin_list: List[RelatedPersonData]
+        self, patient_result, next_of_kin_list: List[RelatedPersonData]
     ) -> None:
-        """Populate NK1 segments for father/mother.
+        """Populate NK1 segments for father/mother in the main_patient's PATIENT_RESULT group.
 
         NK1 segments come after PID/CON in the patient group hierarchy.
         Creates one NK1 segment per next of kin entry.
 
-        :param msg: HL7v2 message to populate
-        :type msg: Message
+        :param patient_result: PATIENT_RESULT group to populate
         :param next_of_kin_list: List of next of kin data (father/mother)
         :type next_of_kin_list: List[RelatedPersonData]
         :return: None
         :rtype: None
         """
-        patient_group = msg.oru_r01_patient_result.oru_r01_patient
+        patient_group = patient_result.oru_r01_patient
 
         for nok in next_of_kin_list:
             nk1 = patient_group.add_segment("NK1")
@@ -460,173 +479,284 @@ class HL7v2Generator:
             if nok.birth_date:
                 nk1.nk1_16 = nok.hl7_birth_date
 
+    def _populate_pid_for_nok(
+        self, patient_result, nok: RelatedPersonData, report_id: str
+    ) -> None:
+        """Populate PID segment for a NOK individual (father/mother).
+
+        :param patient_result: PATIENT_RESULT group to populate
+        :param nok: NOK data (father or mother)
+        :type nok: RelatedPersonData
+        :param report_id: Report ID for PID-18
+        :type report_id: str
+        """
+        patient_group = patient_result.oru_r01_patient
+
+        patient_group.pid.set_id_pid = str(nok.set_id + 1)
+
+        if nok.patient_id:
+            patient_group.pid.patient_identifier_list = (
+                f"{nok.patient_id}^^^{self.institution.lab_name}"
+                f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^PI"
+            )
+
+        if nok.family_name and nok.given_name:
+            patient_group.pid.patient_name = (
+                f"{nok.family_name}^{nok.given_name}^^^^^L"
+            )
+
+        patient_group.pid.date_time_of_birth = nok.hl7_birth_date
+
+        if nok.sex:
+            patient_group.pid.administrative_sex = nok.sex
+
+        patient_group.pid.patient_account_number = (
+            f"{report_id}^^^{self.institution.lab_name}"
+            f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^AN"
+        )
+
+    def _populate_nk1_for_nok(
+        self,
+        patient_result,
+        this_nok: RelatedPersonData,
+        main_patient: PatientData,
+        all_nok: List[RelatedPersonData],
+    ) -> None:
+        """Populate NK1 segments with inverse relationships for a NOK's PATIENT_RESULT group.
+
+        From this NOK's perspective:
+        - The main_patient is their child (CHD)
+        - The other parent (if any) is their spouse (SPO)
+
+        :param patient_result: PATIENT_RESULT group to populate
+        :param this_nok: The NOK whose PID group we are populating
+        :type this_nok: RelatedPersonData
+        :param main_patient: Main patient (main_patient) data
+        :type main_patient: PatientData
+        :param all_nok: Full list of all NOK (to find the other parent)
+        :type all_nok: List[RelatedPersonData]
+        """
+        patient_group = patient_result.oru_r01_patient
+        set_id = 1
+
+        nk1 = patient_group.add_segment("NK1")
+        nk1.nk1_1 = str(set_id)
+        set_id += 1
+        if main_patient.patient_family_name and main_patient.patient_given_name:
+            nk1.nk1_2 = f"{main_patient.patient_family_name}^{main_patient.patient_given_name}^^^^^L"
+        nk1.nk1_3 = "CHD"
+        if main_patient.sex:
+            nk1.nk1_15 = main_patient.sex
+        if main_patient.birth_date:
+            nk1.nk1_16 = main_patient.hl7_birth_date
+
+        for other_nok in all_nok:
+            if other_nok is this_nok:
+                continue
+            nk1_other = patient_group.add_segment("NK1")
+            nk1_other.nk1_1 = str(set_id)
+            set_id += 1
+            if other_nok.family_name and other_nok.given_name:
+                nk1_other.nk1_2 = (
+                    f"{other_nok.family_name}^{other_nok.given_name}^^^^^L"
+                )
+            nk1_other.nk1_3 = "SPO"
+            if other_nok.sex:
+                nk1_other.nk1_15 = other_nok.sex
+            if other_nok.birth_date:
+                nk1_other.nk1_16 = other_nok.hl7_birth_date
+
     def _populate_obx_files(
         self,
-        msg: Message,
+        patient_result,
         directory_path: str,
         date_cloture: datetime,
         patient_data: PatientData,
-        next_of_kin: Optional[List[RelatedPersonData]] = None,
     ) -> None:
-        """Populate OBX segments with file references, grouped by individual.
+        """Populate OBX segments for the main_patient in their own ORDER_OBSERVATION group.
 
-        Scans the prescription directory recursively and creates OBX segments
-        for each file found. Files are grouped by individual:
-        - OBX-1 = "1" : main patient files + root-level files (VCF, tar.gz)
-        - OBX-1 = "2" : father files
-        - OBX-1 = "3" : mother files
+        Includes root-level files (VCF, tar.gz) and files in the main_patient's subfolder.
 
-        OBX-4 is the index within each individual's group (restarts at 1).
-
-        :param msg: HL7v2 message to populate
-        :type msg: Message
+        :param patient_result: PATIENT_RESULT group to populate
         :param directory_path: Directory path to scan for files
         :type directory_path: str
         :param date_cloture: Date de clôture for OBX-14 field
         :type date_cloture: datetime
         :param patient_data: Main patient data for folder identification
         :type patient_data: PatientData
-        :param next_of_kin: List of next of kin data (father/mother)
-        :type next_of_kin: Optional[List[RelatedPersonData]]
         :return: None
         :rtype: None
         :raises ValueError: If unsupported file extension is found
         """
-        if not os.path.exists(directory_path):
+        order_observation = patient_result.add_group("ORU_R01_ORDER_OBSERVATION")
+        obr = order_observation.add_segment("OBR")
+        obr.obr_1 = "1"
+        obr.obr_2 = "11"
+        obr.obr_3 = "11"
+        obr.obr_4 = "GenomicsReport^Genomic Analysis Report"
+
+        if not directory_path or not os.path.exists(directory_path):
             return
 
-        # Build mapping: folder_name → OBX-1 value
-        # OBX-1 = "1" for main patient, "2" for father, "3" for mother
-        patient_folder = (
-            f"{patient_data.patient_family_name}_{patient_data.patient_given_name}"
-        )
-        folder_to_obx1: Dict[str, str] = {
-            patient_folder: "1",  # Main patient
-        }
-
-        if next_of_kin:
-            for nok in next_of_kin:
-                if nok.folder_name:
-                    # set_id=1 for father → OBX-1="2", set_id=2 for mother → OBX-1="3"
-                    folder_to_obx1[nok.folder_name] = str(nok.set_id + 1)
-
-        # Scan files and group by OBX-1
-        files_by_obx1: Dict[str, List[str]] = {"1": [], "2": [], "3": []}
+        # Collect root-level files + main_patient's subfolder files
+        main_patient_folder = patient_data.folder_name
+        files: List[str] = []
 
         for root, dirs, filenames in os.walk(directory_path):
             rel_path = os.path.relpath(root, directory_path)
-
             for filename in filenames:
-                # Skip .hl7 files to avoid self-reference
                 if filename.endswith(".hl7"):
                     continue
-
-                # Determine OBX-1 based on directory
                 if rel_path == ".":
-                    # Root-level files → main patient (OBX-1 = "1")
-                    obx1 = "1"
-                    # Root files: just the filename
-                    file_ref = filename
-                else:
-                    # Files in subdirectory → lookup by folder name
-                    top_folder = rel_path.split(os.sep)[0]
-                    obx1 = folder_to_obx1.get(top_folder, "1")
-                    # Subdirectory files: relative path (folder/filename)
-                    file_ref = os.path.join(rel_path, filename)
+                    files.append(filename)
+                elif main_patient_folder and rel_path.split(os.sep)[0] == main_patient_folder:
+                    files.append(os.path.join(rel_path, filename))
 
-                files_by_obx1[obx1].append(file_ref)
+        self._add_obx_segments_for_files(order_observation, files, directory_path, date_cloture)
 
-        # Create ORDER_OBSERVATION group and OBR segment
-        order_observation = msg.oru_r01_patient_result.add_group(
-            "ORU_R01_ORDER_OBSERVATION"
-        )
+    def _populate_obx_nok_files(
+        self,
+        patient_result,
+        directory_path: str,
+        date_cloture: datetime,
+        nok: RelatedPersonData,
+    ) -> None:
+        """Populate OBX segments for a NOK individual in their own ORDER_OBSERVATION group.
 
+        Scans only the NOK's individual subfolder.
+
+        :param patient_result: PATIENT_RESULT group to populate
+        :param directory_path: Directory path to scan for files
+        :type directory_path: str
+        :param date_cloture: Date de clôture for OBX-14 field
+        :type date_cloture: datetime
+        :param nok: NOK data for folder identification
+        :type nok: RelatedPersonData
+        :return: None
+        :rtype: None
+        :raises ValueError: If unsupported file extension is found
+        """
+        order_observation = patient_result.add_group("ORU_R01_ORDER_OBSERVATION")
         obr = order_observation.add_segment("OBR")
-        obr.obr_1 = "1"  # Set ID
-        obr.obr_2 = "11"  # Placer Order Number
-        obr.obr_3 = "11"  # Filler Order Number
+        obr.obr_1 = "1"
+        obr.obr_2 = "11"
+        obr.obr_3 = "11"
         obr.obr_4 = "GenomicsReport^Genomic Analysis Report"
 
-        # Create OBX segments grouped by individual
-        for obx1_value in ["1", "2", "3"]:
-            files = sorted(files_by_obx1.get(obx1_value, []))
-            obx4_index = 1  # OBX-4 counter (increments for each OBX segment)
-            files_set = set(files)
+        if not directory_path or not os.path.exists(directory_path):
+            return
 
-            for file_ref in files:
-                # Extract filename for format detection (file_ref may include path)
-                filename = os.path.basename(file_ref)
-                # Two cases: normal data file, or orphaned sidecar
-                if filename.endswith(".sha256"):
-                    data_ref = file_ref[: -len(".sha256")]
-                    if data_ref in files_set:
-                        continue
-                    sidecar_ref = file_ref
+        nok_folder = nok.folder_name
+        if not nok_folder:
+            return
+
+        nok_dir = os.path.join(directory_path, nok_folder)
+        if not os.path.exists(nok_dir):
+            return
+
+        files: List[str] = []
+        for root, dirs, filenames in os.walk(nok_dir):
+            rel_path = os.path.relpath(root, directory_path)
+            for filename in filenames:
+                if filename.endswith(".hl7"):
+                    continue
+                files.append(os.path.join(rel_path, filename))
+
+        self._add_obx_segments_for_files(order_observation, files, directory_path, date_cloture)
+
+    def _add_obx_segments_for_files(
+        self,
+        order_observation,
+        files: List[str],
+        directory_path: str,
+        date_cloture: datetime,
+    ) -> None:
+        """Add OBX triplets (RP data, RP sidecar, ED hash) for a list of file references.
+
+        Each file produces up to three OBX segments:
+        1. RP OBX referencing the data file
+        2. RP OBX referencing the .sha256 sidecar (if present)
+        3. ED OBX embedding the SHA-256 hash
+
+        :param order_observation: ORDER_OBSERVATION group to add OBX segments to
+        :param files: List of file paths relative to directory_path
+        :type files: List[str]
+        :param directory_path: Root directory for resolving file paths
+        :type directory_path: str
+        :param date_cloture: Date de clôture for OBX-14 field
+        :type date_cloture: datetime
+        """
+        obx_index = 1
+        files_set = set(files)
+
+        for file_ref in sorted(files):
+            filename = os.path.basename(file_ref)
+            if filename.endswith(".sha256"):
+                data_ref = file_ref[: -len(".sha256")]
+                if data_ref in files_set:
+                    continue  # will be emitted together with the data file
+                sidecar_ref = file_ref
+                hash_b64 = self._read_sha256_b64_from_sidecar(
+                    os.path.join(directory_path, file_ref)
+                )
+            else:
+                data_ref = file_ref
+                sidecar_ref = file_ref + ".sha256"
+                if sidecar_ref in files_set:
                     hash_b64 = self._read_sha256_b64_from_sidecar(
-                        os.path.join(directory_path, file_ref)
+                        os.path.join(directory_path, sidecar_ref)
                     )
                 else:
-                    data_ref = file_ref
-                    sidecar_ref = file_ref + ".sha256"
-                    if sidecar_ref in files_set:
-                        hash_b64 = self._read_sha256_b64_from_sidecar(
-                            os.path.join(directory_path, sidecar_ref)
-                        )
-                    else:
-                        sidecar_ref = None
-                        hash_b64 = self._compute_sha256_b64(
-                            os.path.join(directory_path, file_ref)
-                        )
+                    sidecar_ref = None
+                    hash_b64 = self._compute_sha256_b64(
+                        os.path.join(directory_path, file_ref)
+                    )
 
-                data_filename = os.path.basename(data_ref)
-                code, description, system = self._get_file_format_info(data_filename)
+            data_filename = os.path.basename(data_ref)
+            code, description, system = self._get_file_format_info(data_filename)
 
-                # 1. RP OBX: reference pointer to data file
-                observation_group = order_observation.add_group("ORU_R01_OBSERVATION")
-                obx = observation_group.add_segment("OBX")
-                # OBX-1: Individual number (1=patient, 2=father, 3=mother)
-                obx.obx_1 = obx1_value
-                # OBX-2: Value Type
-                obx.obx_2 = "RP"
-                # OBX-3: Observation Identifier (format code)
-                obx.obx_3 = f"{code}^{description}^{system}"
-                # OBX-4: File index within this individual's group
-                obx.obx_4 = str(obx4_index)
-                obx4_index += 1
-                obx.obx_5 = data_ref
-                obx.obx_11 = "F"
-                obx.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+            # 1. RP OBX: reference pointer to data file
+            observation_group = order_observation.add_group("ORU_R01_OBSERVATION")
+            obx = observation_group.add_segment("OBX")
+            obx.obx_1 = str(obx_index)
+            obx.obx_2 = "RP"
+            obx.obx_3 = f"{code}^{description}^{system}"
+            obx.obx_4 = str(obx_index)
+            obx.obx_5 = data_ref
+            obx.obx_11 = "F"
+            obx.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+            obx_index += 1
 
-                # 2. RP OBX: reference pointer to .sha256 sidecar (if present)
-                if sidecar_ref is not None:
-                    sidecar_filename = os.path.basename(sidecar_ref)
-                    s_code, s_desc, s_system = self._get_file_format_info(sidecar_filename)
-                    observation_group_s = order_observation.add_group("ORU_R01_OBSERVATION")
-                    obx_s = observation_group_s.add_segment("OBX")
-                    obx_s.obx_1 = obx1_value
-                    obx_s.obx_2 = "RP"
-                    obx_s.obx_3 = f"{s_code}^{s_desc}^{s_system}"
-                    obx_s.obx_4 = str(obx4_index)
-                    obx4_index += 1
-                    obx_s.obx_5 = sidecar_ref
-                    obx_s.obx_11 = "F"
-                    obx_s.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+            # 2. RP OBX: reference pointer to .sha256 sidecar (if present)
+            if sidecar_ref is not None:
+                sidecar_filename = os.path.basename(sidecar_ref)
+                s_code, s_desc, s_system = self._get_file_format_info(sidecar_filename)
+                observation_group_s = order_observation.add_group("ORU_R01_OBSERVATION")
+                obx_s = observation_group_s.add_segment("OBX")
+                obx_s.obx_1 = str(obx_index)
+                obx_s.obx_2 = "RP"
+                obx_s.obx_3 = f"{s_code}^{s_desc}^{s_system}"
+                obx_s.obx_4 = str(obx_index)
+                obx_s.obx_5 = sidecar_ref
+                obx_s.obx_11 = "F"
+                obx_s.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+                obx_index += 1
 
-                # 3. ED OBX: embedded SHA-256 hash of the data file
-                observation_group_ed = order_observation.add_group("ORU_R01_OBSERVATION")
-                obx_ed = observation_group_ed.add_segment("OBX")
-                obx_ed.obx_1 = obx1_value
-                obx_ed.obx_2 = "ED"
-                obx_ed.obx_3 = "operation_3098^SHA256 Checksum^http://edamontology.org"
-                obx_ed.obx_4 = str(obx4_index)
-                obx4_index += 1
-                obx_ed.obx_5 = f"^TXT^SHA256^Base64^{hash_b64}"
-                obx_ed.obx_11 = "F"
-                obx_ed.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+            # 3. ED OBX: embedded SHA-256 hash of the data file
+            observation_group_ed = order_observation.add_group("ORU_R01_OBSERVATION")
+            obx_ed = observation_group_ed.add_segment("OBX")
+            obx_ed.obx_1 = str(obx_index)
+            obx_ed.obx_2 = "ED"
+            obx_ed.obx_3 = "operation_3098^SHA256 Checksum^http://edamontology.org"
+            obx_ed.obx_4 = str(obx_index)
+            obx_ed.obx_5 = f"^TXT^SHA256^Base64^{hash_b64}"
+            obx_ed.obx_11 = "F"
+            obx_ed.obx_14 = date_cloture.strftime("%Y%m%d%H%M%S")
+            obx_index += 1
 
     def _populate_prt(
         self,
-        msg: Message,
+        patient_result,
         rcp: CareTeamData,
         person: PersonData,
         analysis: ProcedureData,
@@ -634,8 +764,7 @@ class HL7v2Generator:
     ) -> None:
         """Populate complete PRT segment using hl7apy according to Excel specifications.
 
-        :param msg: HL7v2 message to populate
-        :type msg: Message
+        :param patient_result: PATIENT_RESULT group (main_patient's) to populate
         :param rcp: RCP data from business model
         :type rcp: CareTeamData
         :param person: Person data from business model
@@ -649,8 +778,12 @@ class HL7v2Generator:
         """
         try:
             # Navigate to correct HL7v2 hierarchy for PRT segment
-            order_observation = msg.oru_r01_patient_result.oru_r01_order_observation
-            observation_group = order_observation.oru_r01_observation
+            order_observation = patient_result.oru_r01_order_observation
+            obs_groups = [
+                c for c in order_observation.children
+                if getattr(c, "name", "").upper() == "ORU_R01_OBSERVATION"
+            ]
+            observation_group = obs_groups[-1] if obs_groups else order_observation.oru_r01_observation
 
             # PRT-1: Participation Instance Id (EI) - Complete format with authority
             if rcp and rcp.rcp_nom and rcp.rcp_id:
@@ -753,9 +886,11 @@ class HL7v2Generator:
         :rtype: Tuple[str, str, str]
         :raises ValueError: If file extension is not supported
         """
-        # Handle compound extension .tar.gz first
+        # Handle compound extensions first (longest match wins)
         if filename.lower().endswith(".tar.gz"):
             extension = "tar.gz"
+        elif filename.lower().endswith(".vcf.gz"):
+            extension = "vcf.gz"
         else:
             # Get single extension
             parts = filename.lower().split(".")
