@@ -29,6 +29,7 @@ from ser_client_api.hl7v2.domain_models import (
 
 # GIP-CPS OID for "type_identifiant_structure"
 OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
+_PFMG_FILIERE_SYSTEM = "http://www.genomecad.fr/CodeSystem/PFMG/Filiere"
 
 
 class HL7v2Generator:
@@ -241,8 +242,12 @@ class HL7v2Generator:
             f"{membre_lmg}^^^^^^^^{self.institution.lab_name}"
             f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^D^^^EI"
         )
-        # TODO fix this admit_source, specification was incorrect
-        # visit_group.pv1.admit_source = f"{preindication_name}^{preindication_key}^1.2.250.1.710.1.2.10.3^ISO"
+        if preindication_data.canonical_filiere_code:
+            visit_group.pv1.admit_source = (
+                f"{preindication_data.canonical_filiere_code}"
+                f"^{preindication_data.canonical_filiere_display}"
+                f"^{_PFMG_FILIERE_SYSTEM}"
+            )
         visit_group.pv1.visit_number = (
             f"{analysis_id}^^^{self.institution.lab_name}"
             f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^VN"

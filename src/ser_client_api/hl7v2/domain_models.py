@@ -19,6 +19,8 @@ class ConditionData:
     key: str
     cat_name: str
     cat_key: str
+    canonical_filiere_code: Optional[str] = None
+    canonical_filiere_display: Optional[str] = None
 
 
 @dataclass

@@ -21,6 +21,7 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
+from ser_client_api.vocabularies.seqoia import translate_filiere
 
 
 def _get_required_field(data: Dict[str, Any], field: str) -> Any:
@@ -139,11 +140,15 @@ class SeqoiaParser:
 
     def _parse_preindication_data(self, json_data: Dict[str, Any]) -> ConditionData:
         preindication = _get_required_field(json_data, "preindication")
+        key = _get_required_field(preindication, "key")
+        filiere = translate_filiere(key)
         return ConditionData(
             name=_get_required_field(preindication, "name"),
-            key=_get_required_field(preindication, "key"),
+            key=key,
             cat_name=_get_required_field(preindication, "catname"),
             cat_key=_get_required_field(preindication, "catkey"),
+            canonical_filiere_code=filiere[0] if filiere else None,
+            canonical_filiere_display=filiere[1] if filiere else None,
         )
 
     def _parse_resultat_data(self, json_data: Dict[str, Any]) -> ObservationData:
