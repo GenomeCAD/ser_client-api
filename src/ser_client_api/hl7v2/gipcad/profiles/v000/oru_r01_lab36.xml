@@ -1482,14 +1482,14 @@
             </Component>
             <Component Name="professional suffix" Usage="O" Datatype="ST" Length="199" />
           </Field>
-          <Field Name="Relationship" Usage="O" Min="0" Max="1" Datatype="CE" Length="478" Table="0063" ItemNo="00192">
+          <Field Name="Relationship" Usage="O" Min="0" Max="1" Datatype="CWE" Length="478" ItemNo="00192">
             <Reference>3.4.5.3</Reference>
             <Component Name="identifier" Usage="O" Datatype="ST" Length="20" />
             <Component Name="text" Usage="O" Datatype="ST" Length="199" />
-            <Component Name="name of coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
-            <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="20" />
-            <Component Name="alternate text" Usage="O" Datatype="ST" Length="199" />
-            <Component Name="name of alternate coding system" Usage="O" Datatype="ID" Length="20" Table="0396" />
+            <Component Name="name of coding system" Usage="O" Datatype="ST" Length="255" />
+            <Component Name="alternate identifier" Usage="O" Datatype="ST" Length="4" />
+            <Component Name="alternate text" Usage="O" Datatype="ST" Length="20" />
+            <Component Name="name of alternate coding system" Usage="O" Datatype="ST" Length="255" />
           </Field>
           <Field Name="Address" Usage="O" Min="0" Max="*" Datatype="XAD" Length="513" ItemNo="00193">
             <Reference>3.4.5.4</Reference>
