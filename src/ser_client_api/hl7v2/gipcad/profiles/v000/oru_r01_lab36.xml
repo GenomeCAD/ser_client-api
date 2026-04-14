@@ -2485,8 +2485,11 @@
             <Field Name="Re-admission Indicator" Usage="O" Min="0" Max="1" Datatype="IS" Length="2" Table="0092">
               <Reference>3.4.3.13</Reference>
             </Field>
-            <Field Name="Admit Source" Usage="O" Min="0" Max="1" Datatype="IS" Length="6" Table="0023">
+            <Field Name="Admit Source" Usage="O" Min="0" Max="1" Datatype="CWE" Length="705">
               <Reference>3.4.3.14</Reference>
+              <Component Name="identifier" Usage="O" Datatype="ST" Length="20" />
+              <Component Name="text" Usage="O" Datatype="ST" Length="199" />
+              <Component Name="name of coding system" Usage="O" Datatype="ST" Length="255" />
             </Field>
             <Field Name="Ambulatory Status" Usage="O" Min="0" Max="*" Datatype="IS" Length="2" Table="0009">
               <Reference>3.4.3.15</Reference>

@@ -3,10 +3,10 @@ SeqOIA vocabulary mappings - CAD standardization layer.
 
 Domain covered:
 
-    FILIERE - maps preindication.name to a PFMG Filière code and full display label,
+    FILIERE - maps preindication.key (e.g. "p1-sp49") to a PFMG Filière code and full display label,
     used to populate PV1.14 of the ORU_R01 CAD message.
 
-Unknown names are not rejected — a warning is logged and the caller receives None,
+Unknown keys are not rejected - a warning is logged and the caller receives None,
 allowing the generator to leave PV1.14 empty rather than fail.
 """
 
@@ -15,136 +15,92 @@ import logging
 logger = logging.getLogger(__name__)
 
 FILIERE: dict[str, tuple[str, str]] = {
-    "Cardiomyopathies familiales":                  ("F-01", "Cardiomyopathies familiales [CARDIOGEN]"),
-    "Troubles du rythme héréditaires":               ("F-02", "Troubles du rythme héréditaires [CARDIOGEN]"),
-    "Lymphoedèmes primaires":                        ("F-03", "Lymphoedèmes primaires [FAVA-Multi]"),
-    "Maladie de Rendu-Osler":                        ("F-04", "Maladie de Rendu-Osler [FAVA-Multi]"),
-    "Maladies des artères de moyen calibre":         ("F-05", "Maladies des artères de moyen calibre [FAVA-Multi]"),
-    "Malformations artérioveineuses superficielles et du SNC à potentiel agressif":
-                                                     ("F-06", "Malformations artérioveineuses superficielles et du SNC à potentiel agressif [FAVA-Multi]"),
-    "Syndrome de Marfan et pathologies apparentées, formes familiales d'anévrysmes de l'aorte thoracique":
-                                                     ("F-07", "Syndrome de Marfan et pathologies apparentées, formes familiales d'anévrysmes de l'aorte thoracique [FAVA-Multi]"),
-    "Génodermatoses":                                ("F-08", "Génodermatoses [FIMARAD]"),
-    "Maladies mitochondriales":                      ("F-09", "Maladies mitochondriales [FILNEMUS]"),
-    "Anomalies sévères de la différenciation sexuelle d'origine gonadique et hypothalamo-hypophysaire":
-                                                     ("F-10", "Anomalies sévères de la différenciation sexuelle d'origine gonadique et hypothalamo-hypophysaire [FIRENDO]"),
-    "Diabète néonatal":                              ("F-11", "Diabète néonatal [FIRENDO]"),
-    "Diabètes rares du sujet jeune et diabètes lipoatrophiques":
-                                                     ("F-12", "Diabètes rares du sujet jeune et diabètes lipoatrophiques [FIRENDO]"),
-    "Dysfonction de l'axe thyréotrope et hypothyroïdies congénitales":
-                                                     ("F-13", "Dysfonction de l'axe thyréotrope et hypothyroïdies congénitales [FIRENDO]"),
-    "Dyslipidémies primaires rares":                 ("F-14", "Dyslipidémies primaires rares [FIRENDO]"),
-    "Déficit hypophysaire combiné ou somatotrope isolé ou corticotrope isolé":
-                                                     ("F-15", "Déficit hypophysaire combiné ou somatotrope isolé ou corticotrope isolé [FIRENDO]"),
-    "Hypersécrétions hormonales hypophysaires et lésions endocriniennes multiples (hors NEM2)":
-                                                     ("F-16", "Hypersécrétions hormonales hypophysaires et lésions endocriniennes multiples (hors NEM2) [FIRENDO]"),
-    "Syndrome de Cushing par hyperplasie nodulaire bilatérale des surrénales et Insuffisance Surrénale Primaire":
-                                                     ("F-17", "Syndrome de Cushing par hyperplasie nodulaire bilatérale des surrénales et Insuffisance Surrénale Primaire [FIRENDO]"),
-    "Maladies héréditaires du métabolisme":          ("F-18", "Maladies héréditaires du métabolisme [G2M]"),
-    "Pathologies rares du métabolisme phospho-calcique ou de la minéralisation dentaire":
-                                                     ("F-19", "Pathologies rares du métabolisme phospho-calcique ou de la minéralisation dentaire [OSCAR]"),
-    "Aplasies et hypoplasies médullaires":           ("F-20", "Aplasies et hypoplasies médullaires [MaRIH]"),
-    "Histiocytoses sans mutation BRAFV600E":         ("F-21", "Histiocytoses sans mutation BRAFV600E [MaRIH]"),
-    "Neutropénies chroniques sévères":               ("F-22", "Neutropénies chroniques sévères [MaRIH]"),
-    "Syndromes hyperéosinophiliques clonaux inexpliqués":
-                                                     ("F-23", "Syndromes hyperéosinophiliques clonaux inexpliqués [MaRIH]"),
-    "Maladies constitutionnelles du globule rouge":  ("F-24", "Maladies constitutionnelles du globule rouge [MCGRE]"),
-    "Pathologies de l'hémostase":                    ("F-25", "Pathologies de l'hémostase [MHEMO]"),
-    "Pathologies sévères du foie à révélation pédiatrique":
-                                                     ("F-26", "Pathologies sévères du foie à révélation pédiatrique [FILFOIE]"),
-    "Entéropathies congénitales du jeune enfant":    ("F-27", "Entéropathies congénitales du jeune enfant [FIMATHO]"),
-    "Pancréatites chroniques d'origine génétique":   ("F-28", "Pancréatites chroniques d'origine génétique [FIMATHO]"),
-    "Néphropathies chroniques":                      ("F-29", "Néphropathies chroniques [ORKID]"),
-    "Maladies auto-inflammatoires et auto-immunes monogéniques":
-                                                     ("F-30", "Maladies auto-inflammatoires et auto-immunes monogéniques [FAI²R]"),
-    "Angioedèmes bradykiniques héréditaires":        ("F-31", "Angioedèmes bradykiniques héréditaires [MaRIH]"),
-    "Déficits immunitaires héréditaires":            ("F-32", "Déficits immunitaires héréditaires [MaRIH]"),
-    "Ataxies héréditaires du sujet jeune":           ("F-33", "Ataxies héréditaires du sujet jeune [BRAIN-TEAM]"),
-    "Calcifications cérébrales":                     ("F-34", "Calcifications cérébrales [BRAIN-TEAM]"),
-    "Dystonie ou mouvements anormaux rares du sujet jeune":
-                                                     ("F-35", "Dystonie ou mouvements anormaux rares du sujet jeune [BRAIN-TEAM]"),
-    "Leucodystrophies":                              ("F-36", "Leucodystrophies [BRAIN-TEAM]"),
-    "Maladies cérébrovasculaires rares":             ("F-37", "Maladies cérébrovasculaires rares [BRAIN-TEAM]"),
-    "Maladies et troubles cognitifs neurodégénératifs du sujet jeune et/ou familiaux":
-                                                     ("F-38", "Maladies et troubles cognitifs neurodégénératifs du sujet jeune et/ou familiaux [BRAIN-TEAM]"),
-    "Neurodégénérescence par accumulation intracérébrale de fer":
-                                                     ("F-39", "Neurodégénérescence par accumulation intracérébrale de fer [BRAIN-TEAM]"),
-    "Paraparésies spastiques héréditaires du sujet jeune":
-                                                     ("F-40", "Paraparésies spastiques héréditaires du sujet jeune [BRAIN-TEAM]"),
-    "Hypotonies néonatales périphériques suspectes de maladies neuromusculaires":
-                                                     ("F-41", "Hypotonies néonatales périphériques suspectes de maladies neuromusculaires [FILNEMUS]"),
-    "Myopathies":                                    ("F-42", "Myopathies [FILNEMUS]"),
-    "Neuropathies périphériques héréditaires":       ("F-43", "Neuropathies périphériques héréditaires [FILNEMUS]"),
-    "Sclérose latérale amyotrophique":               ("F-44", "Sclérose latérale amyotrophique [FilSLAN]"),
-    "Maladies osseuses constitutionnelles":          ("F-45", "Maladies osseuses constitutionnelles [OSCAR]"),
-    "Syndromes avec hyperlaxité articulaire majeure, sans déficit intellectuel":
-                                                     ("F-46", "Syndromes avec hyperlaxité articulaire majeure, sans déficit intellectuel [OSCAR]"),
-    "Maladies respiratoires rares":                  ("F-47", "Maladies respiratoires rares [RESPIFIL]"),
-    "Anomalies du développement, syndromes malformatifs et syndromes dysmorphiques sans déficience intellectuelle":
-                                                     ("F-48", "Anomalies du développement, syndromes malformatifs et syndromes dysmorphiques sans déficience intellectuelle [AnDDI-Rares]"),
-    "Déficience intellectuelle":                     ("F-49", "Déficience intellectuelle [AnDDI-Rares]"),   # also F-50
-    "Malformations cérébrales":                      ("F-51", "Malformations cérébrales [AnDDI-Rares]"),    # also F-52
-    "Troubles Psychiatriques Majeurs":               ("F-53", "Troubles Psychiatriques Majeurs [AnDDI-Rares]"),  # also F-54
-    "Dysraphismes":                                  ("F-55", "Dysraphismes [AnDDI-Rares]"),                # also F-56
-    "Malformations cardiaques complexes congénitales":
-                                                     ("F-57", "Malformations cardiaques complexes congénitales [CARDIOGEN]"),
-    "Epilepsies pharmacorésistantes à début précoce":
-                                                     ("F-58", "Epilepsies pharmacorésistantes à début précoce [DéfiScience]"),
-    "Malformations et maladies congénitales et très précoces du cervelet et du tronc cérébral":
-                                                     ("F-59", "Malformations et maladies congénitales et très précoces du cervelet et du tronc cérébral [DéfiScience]"),
-    "Obésités génétiques rares":                     ("F-60", "Obésités génétiques rares [DéfiScience]"),
-    "Troubles du spectre autistique ou troubles précoces et sévères du neuro-développement- sans déficience intellectuelle, de formes monogéniques":
-                                                     ("F-61", "Troubles du spectre autistique ou troubles précoces et sévères du neuro-développement- sans déficience intellectuelle, de formes monogéniques [DéfiScience]"),
-    "Malformations oculaires":                       ("F-62", "Malformations oculaires [SENSGENE]"),
-    "Neuropathies optiques génétiques (NOG)":        ("F-63", "Neuropathies optiques génétiques (NOG) [SENSGENE]"),
-    "Formes syndromiques de maladies rares à expression bucco-dentaire":
-                                                     ("F-64", "Formes syndromiques de maladies rares à expression bucco-dentaire [TÊTECOU]"),
-    "Infertilités masculines rares":                 ("F-65", "Infertilités masculines rares [FIRENDO]"),
-    "Insuffisance ovarienne prématurée et anomalies ovocytaires rares":
-                                                     ("F-66", "Insuffisance ovarienne prématurée et anomalies ovocytaires rares [FIRENDO]"),
-    "Dystrophies rétiniennes héréditaires":          ("F-67", "Dystrophies rétiniennes héréditaires [SENSGENE]"),
-    "Surdités précoces":                             ("F-68", "Surdités précoces [SENSGENE]"),
-    "Patients adultes atteints de leucémie aiguë au diagnostic, éligibles à un traitement actif":
-                                                     ("F-69", "Patients adultes atteints de leucémie aiguë au diagnostic, éligibles à un traitement actif [ALFA]"),  # also F-70/71/72
-    "Leucémies aiguës réfractaires ou en rechute chez l'adulte":
-                                                     ("F-73", "Leucémies aiguës réfractaires ou en rechute chez l'adulte [GBMHM]"),
-    "Lymphomes B diffus à grandes cellules en rechute ou réfractaires":
-                                                     ("F-74", "Lymphomes B diffus à grandes cellules en rechute ou réfractaires [GBMHM]"),  # also F-75
-    "Lymphomes de diagnostic incertain":             ("F-76", "Lymphomes de diagnostic incertain [GBMHM]"),  # also F-77
-    "Cancers avancés en échec thérapeutique de première ligne":
-                                                     ("F-78", "Cancers avancés en échec thérapeutique de première ligne [GFCO]"),  # also F-79
-    "Cancers de primitif inconnu":                   ("F-80", "Cancers de primitif inconnu [GFCO]"),        # also F-81
-    "Cancers rares":                                 ("F-82", "Cancers rares [GFCO]"),                      # also F-83
-    "Cancers et leucémies pédiatriques au diagnostic":
-                                                     ("F-84", "Cancers et leucémies pédiatriques au diagnostic [SFCE]"),
-    "Cancers et leucémies pédiatriques en échec de traitement":
-                                                     ("F-85", "Cancers et leucémies pédiatriques en échec de traitement [SFCE]"),
-    "Leucémies aiguës (LA) de l'adulte avec histoire familiale":
-                                                     ("F-86", "Leucémies aiguës (LA) de l'adulte avec histoire familiale [CIGAL]"),
-    "Cancers avec antécédents familiaux particulièrement sévères":
-                                                     ("F-87", "Cancers avec antécédents familiaux particulièrement sévères [Groupe génétique et cancer]"),
-    "Cancers avec phénotypes tumoraux extrêmes et sans antécédents familiaux":
-                                                     ("F-88", "Cancers avec phénotypes tumoraux extrêmes et sans antécédents familiaux [Groupe génétique et cancer]"),
-    "Néoplasmes myéloprolifératifs familiaux et thrombocytose héréditaire":
-                                                     ("F-89", "Néoplasmes myéloprolifératifs familiaux et thrombocytose héréditaire [FIM]"),  # also F-90
-    "Hypertension artérielle monogénique du sujet jeune":
-                                                     ("F-91", "Hypertension artérielle monogénique du sujet jeune [ORKID / FIRENDO]"),
-    "Migraine hémiplégique familiale":               ("F-92", "Migraine hémiplégique familiale [BRAIN-TEAM]"),
-    "Myélome multiple au diagnostic chez des patients non fragiles":
-                                                     ("F-93", "Myélome multiple au diagnostic chez des patients non fragiles [Intergroupe Francophone du Myélome]"),
-    "Lymphomes B cutanés primitifs réfractaires ou récidivants":
-                                                     ("F-94", "Lymphomes B cutanés primitifs réfractaires ou récidivants [GFELC]"),
-    "Prédisposition aux hémopathies malignes de l'enfant et de l'adolescent":
-                                                     ("F-95", "Prédisposition aux hémopathies malignes de l'enfant et de l'adolescent [SFCE]"),
+    "p1-sp1":  ("F-45", "Maladies osseuses constitutionnelles [OSCAR]"),
+    "p1-sp2":  ("F-09", "Maladies mitochondriales [FILNEMUS]"),
+    "p1-sp3":  ("F-10", "Anomalies sévères de la différenciation sexuelle d'origine gonadique et hypothalamo-hypophysaire [FIRENDO]"),
+    "p1-sp4":  ("F-66", "Insuffisance ovarienne prématurée et anomalies ovocytaires rares [FIRENDO]"),
+    "p1-sp5":  ("F-18", "Maladies héréditaires du métabolisme [G2M]"),
+    "p1-sp6":  ("F-29", "Néphropathies chroniques [ORKID]"),
+    "p1-sp7":  ("F-30", "Maladies auto-inflammatoires et auto-immunes monogéniques [FAI²R]"),
+    "p1-sp8":  ("F-01", "Cardiomyopathies familiales [CARDIOGEN]"),
+    "p1-sp9":  ("F-36", "Leucodystrophies [BRAIN-TEAM]"),
+    "p1-sp10": ("F-48", "Anomalies du développement, syndromes malformatifs et syndromes dysmorphiques sans déficience intellectuelle [AnDDI-Rares]"),
+    "p1-sp11": ("F-51", "Malformations cérébrales [AnDDI-Rares]"),        # also F-52; multi-filière
+    "p1-sp12": ("F-51", "Malformations cérébrales [AnDDI-Rares]"),        # also F-52; multi-filière
+    "p1-sp13": ("F-58", "Epilepsies pharmacorésistantes à début précoce [DéfiScience]"),
+    "p1-sp14": ("F-33", "Ataxies héréditaires du sujet jeune [BRAIN-TEAM]"),
+    "p1-sp15": ("F-40", "Paraparésies spastiques héréditaires du sujet jeune [BRAIN-TEAM]"),
+    "p1-sp16": ("F-41", "Hypotonies néonatales périphériques suspectes de maladies neuromusculaires [FILNEMUS]"),
+    "p1-sp17": ("F-42", "Myopathies [FILNEMUS]"),
+    "p1-sp18": ("F-13", "Dysfonction de l'axe thyréotrope et hypothyroïdies congénitales [FIRENDO]"),
+    "p1-sp19": ("F-11", "Diabète néonatal [FIRENDO]"),
+    "p1-sp20": ("F-68", "Surdités précoces [SENSGENE]"),
+    "p1-sp21": ("F-62", "Malformations oculaires [SENSGENE]"),
+    "p1-sp22": ("F-35", "Dystonie ou mouvements anormaux rares du sujet jeune [BRAIN-TEAM]"),
+    "p1-sp23": ("F-38", "Maladies et troubles cognitifs neurodégénératifs du sujet jeune et/ou familiaux [BRAIN-TEAM]"),
+    "p1-sp24": ("F-39", "Neurodégénérescence par accumulation intracérébrale de fer [BRAIN-TEAM]"),
+    "p1-sp25": ("F-57", "Malformations cardiaques complexes congénitales [CARDIOGEN]"),
+    "p1-sp26": ("F-02", "Troubles du rythme héréditaires [CARDIOGEN]"),
+    "p1-sp27": ("F-01", "Cardiomyopathies familiales [CARDIOGEN]"),
+    "p1-sp28": ("F-04", "Maladie de Rendu-Osler [FAVA-Multi]"),
+    "p1-sp29": ("F-07", "Syndrome de Marfan et pathologies apparentées, formes familiales d'anévrysmes de l'aorte thoracique [FAVA-Multi]"),
+    "p1-sp30": ("F-06", "Malformations artérioveineuses superficielles et du SNC à potentiel agressif [FAVA-Multi]"),
+    "p1-sp31": ("F-05", "Maladies des artères de moyen calibre [FAVA-Multi]"),
+    "p1-sp32": ("F-26", "Pathologies sévères du foie à révélation pédiatrique [FILFOIE]"),
+    "p1-sp33": ("F-08", "Génodermatoses [FIMARAD]"),
+    "p1-sp34": ("F-27", "Entéropathies congénitales du jeune enfant [FIMATHO]"),
+    "p1-sp35": ("F-16", "Hypersécrétions hormonales hypophysaires et lésions endocriniennes multiples (hors NEM2) [FIRENDO]"),
+    "p1-sp36": ("F-12", "Diabètes rares du sujet jeune et diabètes lipoatrophiques [FIRENDO]"),
+    "p1-sp37": ("F-15", "Déficit hypophysaire combiné ou somatotrope isolé ou corticotrope isolé [FIRENDO]"),
+    "p1-sp38": ("F-18", "Maladies héréditaires du métabolisme [G2M]"),
+    "p1-sp39": ("F-32", "Déficits immunitaires héréditaires [MaRIH]"),
+    "p1-sp40": ("F-24", "Maladies constitutionnelles du globule rouge [MCGRE]"),
+    "p1-sp41": ("F-25", "Pathologies de l'hémostase [MHEMO]"),
+    "p1-sp42": ("F-47", "Maladies respiratoires rares [RESPIFIL]"),
+    "p1-sp43": ("F-67", "Dystrophies rétiniennes héréditaires [SENSGENE]"),
+    "p1-sp44": ("F-53", "Troubles Psychiatriques Majeurs [AnDDI-Rares]"),  # also F-54; multi-filière
+    "p1-sp45": ("F-61", "Troubles du spectre autistique ou troubles précoces et sévères du neuro-développement- sans déficience intellectuelle, de formes monogéniques [DéfiScience]"),  # corrigé=Y
+    "p1-sp46": ("F-22", "Neutropénies chroniques sévères [MaRIH]"),
+    "p1-sp47": ("F-55", "Dysraphismes [AnDDI-Rares]"),                    # also F-56; multi-filière
+    "p1-sp48": ("F-19", "Pathologies rares du métabolisme phospho-calcique ou de la minéralisation dentaire [OSCAR]"),
+    "p1-sp49": ("F-20", "Aplasies et hypoplasies médullaires [MaRIH]"),
+    "p1-sp50": ("F-64", "Formes syndromiques de maladies rares à expression bucco-dentaire [TÊTECOU]"),
+    "p1-sp51": ("F-61", "Troubles du spectre autistique ou troubles précoces et sévères du neuro-développement- sans déficience intellectuelle, de formes monogéniques [DéfiScience]"),
+    "p1-sp52": ("F-17", "Syndrome de Cushing par hyperplasie nodulaire bilatérale des surrénales et Insuffisance Surrénale Primaire [FIRENDO]"),
+    "p1-sp53": ("F-34", "Calcifications cérébrales [BRAIN-TEAM]"),
+    "p1-sp54": ("F-37", "Maladies cérébrovasculaires rares [BRAIN-TEAM]"),
+    "p1-sp55": ("F-03", "Lymphoedèmes primaires [FAVA-Multi]"),
+    "p1-sp56": ("F-43", "Neuropathies périphériques héréditaires [FILNEMUS]"),
+    "p1-sp57": ("F-44", "Sclérose latérale amyotrophique [FilSLAN]"),
+    "p1-sp58": ("F-28", "Pancréatites chroniques d'origine génétique [FIMATHO]"),
+    "p1-sp59": ("F-65", "Infertilités masculines rares [FIRENDO]"),
+    "p1-sp60": ("F-31", "Angioedèmes bradykiniques héréditaires [MaRIH]"),
+    "p1-sp61": ("F-46", "Syndromes avec hyperlaxité articulaire majeure, sans déficit intellectuel [OSCAR]"),
+    "p1-sp63": ("F-63", "Neuropathies optiques génétiques (NOG) [SENSGENE]"),
+    "p1-sp64": ("F-60", "Obésités génétiques rares [DéfiScience]"),
+    "p1-sp65": ("F-23", "Syndromes hyperéosinophiliques clonaux inexpliqués [MaRIH]"),
+    "p1-sp68": ("F-89", "Néoplasmes myéloprolifératifs familiaux et thrombocytose héréditaire [FIM]"),  # also F-90; multi-filière
+    "p2-sp1":  ("F-85", "Cancers et leucémies pédiatriques en échec de traitement [SFCE]"),
+    "p2-sp11": ("F-84", "Cancers et leucémies pédiatriques au diagnostic [SFCE]"),
+    "p2-sp13": ("F-69", "Patients adultes atteints de leucémie aiguë au diagnostic, éligibles à un traitement actif [ALFA]"),  # also F-70/71/72; multi-filière
+    "p2-sp2":  ("F-73", "Leucémies aiguës réfractaires ou en rechute chez l'adulte [GBMHM]"),
+    "p2-sp4":  ("F-74", "Lymphomes B diffus à grandes cellules en rechute ou réfractaires [GBMHM]"),  # also F-75; multi-filière
+    "p2-sp5":  ("F-76", "Lymphomes de diagnostic incertain [GBMHM]"),     # also F-77; multi-filière
+    "p2-sp6":  ("F-82", "Cancers rares [GFCO]"),                           # also F-83; multi-filière
+    "p2-sp7":  ("F-80", "Cancers de primitif inconnu [GFCO]"),             # also F-81; multi-filière
+    "p2-sp8":  ("F-78", "Cancers avancés en échec thérapeutique de première ligne [GFCO]"),  # also F-79; multi-filière
+    "p3-sp1":  ("F-87", "Cancers avec antécédents familiaux particulièrement sévères [Groupe génétique et cancer]"),
+    "p3-sp2":  ("F-88", "Cancers avec phénotypes tumoraux extrêmes et sans antécédents familiaux [Groupe génétique et cancer]"),
+    "p3-sp3":  ("F-86", "Leucémies aiguës (LA) de l'adulte avec histoire familiale [CIGAL]"),
 }
 
 
-def translate_filiere(preindication_name: str) -> tuple[str, str] | None:
-    """Return (PFMG filière code, full display label) for a SeqOIA preindication name."""
-    result = FILIERE.get(preindication_name)
+def translate_filiere(seqoia_key: str) -> tuple[str, str] | None:
+    """Return (PFMG filière code, full display label) for a SeqOIA preindication key."""
+    result = FILIERE.get(seqoia_key)
     if result is None:
         logger.warning(
-            "SeqOIA preindication name %r has no PFMG filière mapping - PV1.14 will be empty",
-            preindication_name,
+            "SeqOIA preindication key %r has no PFMG filière mapping - PV1.14 will be empty",
+            seqoia_key,
         )
     return result

@@ -140,11 +140,11 @@ class SeqoiaParser:
 
     def _parse_preindication_data(self, json_data: Dict[str, Any]) -> ConditionData:
         preindication = _get_required_field(json_data, "preindication")
-        name = _get_required_field(preindication, "name")
-        filiere = translate_filiere(name)
+        key = _get_required_field(preindication, "key")
+        filiere = translate_filiere(key)
         return ConditionData(
-            name=name,
-            key=_get_required_field(preindication, "key"),
+            name=_get_required_field(preindication, "name"),
+            key=key,
             cat_name=_get_required_field(preindication, "catname"),
             cat_key=_get_required_field(preindication, "catkey"),
             canonical_filiere_code=filiere[0] if filiere else None,
