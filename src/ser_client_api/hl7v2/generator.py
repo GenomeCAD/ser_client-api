@@ -26,6 +26,7 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
+from ser_client_api.vocabularies.gipcad import v3_display
 
 # GIP-CPS OID for "type_identifiant_structure"
 OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
@@ -482,7 +483,7 @@ class HL7v2Generator:
             # NK1-3: Relationship - HL7v3 FamilyMember code (CWE, 6 components)
             # CWE.1-3: primary coding (HL7v3 code + display + system)
             # CWE.4-6: confidence score triplet (score + label + system)
-            display = nok.relationship_display or ""
+            display = v3_display(nok.relationship_code) or ""
             nk1.nk1_3 = (
                 f"{nok.relationship_code}^{display}^{_V3_ROLE_CODE_SYSTEM}"
                 f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
@@ -562,7 +563,7 @@ class HL7v2Generator:
         if main_patient.patient_family_name and main_patient.patient_given_name:
             nk1.nk1_2 = f"{main_patient.patient_family_name}^{main_patient.patient_given_name}^^^^^L"
         nk1.nk1_3 = (
-            f"CHILD^child^{_V3_ROLE_CODE_SYSTEM}"
+            f"CHILD^{v3_display('CHILD') or ''}^{_V3_ROLE_CODE_SYSTEM}"
             f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
         )
         if main_patient.sex:
@@ -581,7 +582,7 @@ class HL7v2Generator:
                     f"{other_nok.family_name}^{other_nok.given_name}^^^^^L"
                 )
             nk1_other.nk1_3 = (
-                f"SPS^spouse^{_V3_ROLE_CODE_SYSTEM}"
+                f"SPS^{v3_display('SPS') or ''}^{_V3_ROLE_CODE_SYSTEM}"
                 f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
             )
             if other_nok.sex:

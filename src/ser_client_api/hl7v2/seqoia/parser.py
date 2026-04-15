@@ -201,8 +201,8 @@ class SeqoiaParser:
             return None
 
         relationship_map = {
-            "père": (1, "FTH", "father"),
-            "mère": (2, "MTH", "mother"),
+            "père": (1, "FTH"),
+            "mère": (2, "MTH"),
         }
         next_of_kin_list = []
 
@@ -219,7 +219,7 @@ class SeqoiaParser:
             if not patient_info or lien_key not in relationship_map:
                 continue
 
-            set_id, rel_code, rel_display = relationship_map[lien_key]
+            set_id, rel_code = relationship_map[lien_key]
 
             birth_date = None
             birth_date_str = _get_optional_field(patient_info, "date_naissance")
@@ -239,7 +239,6 @@ class SeqoiaParser:
             next_of_kin_list.append(RelatedPersonData(
                 set_id=set_id,
                 relationship_code=rel_code,
-                relationship_display=rel_display,
                 family_name=_get_optional_field(patient_info, "nom"),
                 given_name=_get_optional_field(patient_info, "prenom"),
                 birth_date=birth_date,
