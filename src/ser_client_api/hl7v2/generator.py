@@ -31,6 +31,12 @@ from ser_client_api.hl7v2.domain_models import (
 OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
 _PFMG_FILIERE_SYSTEM = "http://www.genomecad.fr/CodeSystem/PFMG/Filiere"
 
+# HL7v3 FamilyMember ValueSet system URI (used in NK1-3 CWE.3)
+_V3_ROLE_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+
+# Match confidence system URI (used in NK1-3 CWE.6 for relationship match scoring)
+_MATCH_CONFIDENCE_SYSTEM = "http://www.genomecad.fr/CodeSystem/MatchConfidence"
+
 
 class HL7v2Generator:
     """Output adapter for HL7v2 generation.
@@ -473,8 +479,14 @@ class HL7v2Generator:
             if nok.family_name and nok.given_name:
                 nk1.nk1_2 = f"{nok.family_name}^{nok.given_name}^^^^^L"
 
-            # NK1-3: Relationship (FTH=Father, MTH=Mother)
-            nk1.nk1_3 = nok.relationship_code
+            # NK1-3: Relationship - HL7v3 FamilyMember code (CWE, 6 components)
+            # CWE.1-3: primary coding (HL7v3 code + display + system)
+            # CWE.4-6: confidence score triplet (score + label + system)
+            display = nok.relationship_display or ""
+            nk1.nk1_3 = (
+                f"{nok.relationship_code}^{display}^{_V3_ROLE_CODE_SYSTEM}"
+                f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
+            )
 
             # NK1-15: Sex
             if nok.sex:
@@ -530,8 +542,8 @@ class HL7v2Generator:
         """Populate NK1 segments with inverse relationships for a NOK's PATIENT_RESULT group.
 
         From this NOK's perspective:
-        - The main_patient is their child (CHD)
-        - The other parent (if any) is their spouse (SPO)
+        - The main_patient is their child (CHILD)
+        - The other parent (if any) is their spouse (SPS)
 
         :param patient_result: PATIENT_RESULT group to populate
         :param this_nok: The NOK whose PID group we are populating
@@ -549,7 +561,10 @@ class HL7v2Generator:
         set_id += 1
         if main_patient.patient_family_name and main_patient.patient_given_name:
             nk1.nk1_2 = f"{main_patient.patient_family_name}^{main_patient.patient_given_name}^^^^^L"
-        nk1.nk1_3 = "CHD"
+        nk1.nk1_3 = (
+            f"CHILD^child^{_V3_ROLE_CODE_SYSTEM}"
+            f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
+        )
         if main_patient.sex:
             nk1.nk1_15 = main_patient.sex
         if main_patient.birth_date:
@@ -565,7 +580,10 @@ class HL7v2Generator:
                 nk1_other.nk1_2 = (
                     f"{other_nok.family_name}^{other_nok.given_name}^^^^^L"
                 )
-            nk1_other.nk1_3 = "SPO"
+            nk1_other.nk1_3 = (
+                f"SPS^spouse^{_V3_ROLE_CODE_SYSTEM}"
+                f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
+            )
             if other_nok.sex:
                 nk1_other.nk1_15 = other_nok.sex
             if other_nok.birth_date:
