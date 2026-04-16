@@ -21,7 +21,7 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
-from ser_client_api.vocabularies.seqoia import translate_filiere
+from ser_client_api.vocabularies.seqoia import translate_filiere, translate_relationship, translate_relationship_by_regex
 
 
 def _get_required_field(data: Dict[str, Any], field: str) -> Any:
@@ -200,11 +200,8 @@ class SeqoiaParser:
         if len(patients_array) < 2:
             return None
 
-        relationship_map = {
-            "père": (1, "FTH", "father"),
-            "mère": (2, "MTH", "mother"),
-        }
         next_of_kin_list = []
+        set_id = 0
 
         for idx in range(1, len(patients_array)):
             patient_entry = patients_array[idx]
@@ -212,14 +209,37 @@ class SeqoiaParser:
 
             if isinstance(lien_data, dict):
                 lien_key = lien_data.get("key", "").lower()
+                lien_name = lien_data.get("name", "")
             else:
                 lien_key = str(lien_data).lower() if lien_data else ""
+                lien_name = ""
 
-            patient_info = _get_optional_field(patient_entry, "patient")
-            if not patient_info or lien_key not in relationship_map:
+            if lien_key == "patient":
                 continue
 
-            set_id, rel_code, rel_display = relationship_map[lien_key]
+            patient_info = _get_optional_field(patient_entry, "patient")
+            if not patient_info:
+                continue
+
+            set_id += 1
+
+            if lien_key == "père":
+                rel_code = "FTH"
+                rel_display: Optional[str] = "father"
+            elif lien_key == "mère":
+                rel_code = "MTH"
+                rel_display = "mother"
+            elif lien_key == "autre":
+                # Level 1: exact match against ConceptMap
+                matched = translate_relationship(lien_name)
+                # Level 2: regex patterns for PII-containing free text
+                if not matched:
+                    matched = translate_relationship_by_regex(lien_name)
+                rel_code = matched if matched else "EXT"
+                rel_display = lien_name or None
+            else:
+                rel_code = "FAMMEMB"
+                rel_display = lien_name or lien_key or None
 
             birth_date = None
             birth_date_str = _get_optional_field(patient_info, "date_naissance")

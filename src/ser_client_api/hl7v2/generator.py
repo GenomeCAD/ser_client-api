@@ -553,6 +553,10 @@ class HL7v2Generator:
         :param all_nok: Full list of all NOK (to find the other parent)
         :type all_nok: List[RelatedPersonData]
         """
+        # Inverse relationships only apply to parents: father sees child + co-parent (spouse)
+        if this_nok.relationship_code not in ("FTH", "MTH"):
+            return
+
         patient_group = patient_result.oru_r01_patient
         set_id = 1
 
@@ -572,6 +576,8 @@ class HL7v2Generator:
 
         for other_nok in all_nok:
             if other_nok is this_nok:
+                continue
+            if other_nok.relationship_code not in ("FTH", "MTH"):
                 continue
             nk1_other = patient_group.add_segment("NK1")
             nk1_other.nk1_1 = str(set_id)
