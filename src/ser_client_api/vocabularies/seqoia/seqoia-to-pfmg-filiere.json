@@ -1,0 +1,166 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "seqoia-to-pfmg-filiere",
+  "url": "http://www.genomecad.fr/ConceptMap/seqoia-to-pfmg-filiere",
+  "version": "0.1.0",
+  "name": "SeqoiaToPfmgFiliere",
+  "title": "SeqOIA preindication key → PFMG filière",
+  "status": "draft",
+  "description": "Maps SeqOIA preindication keys (e.g. p1-sp49) to PFMG Filières de Santé Maladies Rares codes (F-01..F-95). Displays are resolved at runtime from vocabularies/gipcad/PFMG-Filiere.json. When a key maps to several filières the first target is the primary one used in PV1.14.",
+  "group": [
+    {
+      "source": "http://www.seqoia.fr/CodeSystem/preindication",
+      "target": "http://www.genomecad.fr/CodeSystem/PFMG/Filiere",
+      "element": [
+        { "code": "p1-sp1",  "target": [{ "code": "F-45", "equivalence": "equivalent" }] },
+        { "code": "p1-sp2",  "target": [{ "code": "F-09", "equivalence": "equivalent" }] },
+        { "code": "p1-sp3",  "target": [{ "code": "F-10", "equivalence": "equivalent" }] },
+        { "code": "p1-sp4",  "target": [{ "code": "F-66", "equivalence": "equivalent" }] },
+        { "code": "p1-sp5",  "target": [{ "code": "F-18", "equivalence": "equivalent" }] },
+        { "code": "p1-sp6",  "target": [{ "code": "F-29", "equivalence": "equivalent" }] },
+        { "code": "p1-sp7",  "target": [{ "code": "F-30", "equivalence": "equivalent" }] },
+        { "code": "p1-sp8",  "target": [{ "code": "F-01", "equivalence": "equivalent" }] },
+        { "code": "p1-sp9",  "target": [{ "code": "F-36", "equivalence": "equivalent" }] },
+        { "code": "p1-sp10", "target": [{ "code": "F-48", "equivalence": "equivalent" }] },
+        {
+          "code": "p1-sp11",
+          "target": [
+            { "code": "F-51", "equivalence": "equivalent" },
+            { "code": "F-52", "equivalence": "equivalent" },
+            { "code": "F-59", "equivalence": "narrower"   }
+          ]
+        },
+        { "code": "p1-sp12", "target": [{ "code": "F-51", "equivalence": "equivalent" }] },
+        { "code": "p1-sp13", "target": [{ "code": "F-58", "equivalence": "equivalent" }] },
+        { "code": "p1-sp14", "target": [{ "code": "F-33", "equivalence": "equivalent" }] },
+        { "code": "p1-sp15", "target": [{ "code": "F-40", "equivalence": "equivalent" }] },
+        { "code": "p1-sp16", "target": [{ "code": "F-41", "equivalence": "equivalent" }] },
+        { "code": "p1-sp17", "target": [{ "code": "F-42", "equivalence": "equivalent" }] },
+        { "code": "p1-sp18", "target": [{ "code": "F-13", "equivalence": "equivalent" }] },
+        { "code": "p1-sp19", "target": [{ "code": "F-11", "equivalence": "equivalent" }] },
+        { "code": "p1-sp20", "target": [{ "code": "F-68", "equivalence": "equivalent" }] },
+        { "code": "p1-sp21", "target": [{ "code": "F-62", "equivalence": "equivalent" }] },
+        { "code": "p1-sp22", "target": [{ "code": "F-35", "equivalence": "equivalent" }] },
+        { "code": "p1-sp23", "target": [{ "code": "F-38", "equivalence": "equivalent" }] },
+        { "code": "p1-sp24", "target": [{ "code": "F-39", "equivalence": "equivalent" }] },
+        { "code": "p1-sp25", "target": [{ "code": "F-57", "equivalence": "equivalent" }] },
+        { "code": "p1-sp26", "target": [{ "code": "F-02", "equivalence": "equivalent" }] },
+        { "code": "p1-sp27", "target": [{ "code": "F-01", "equivalence": "equivalent" }] },
+        { "code": "p1-sp28", "target": [{ "code": "F-04", "equivalence": "equivalent" }] },
+        { "code": "p1-sp29", "target": [{ "code": "F-07", "equivalence": "equivalent" }] },
+        { "code": "p1-sp30", "target": [{ "code": "F-06", "equivalence": "equivalent" }] },
+        { "code": "p1-sp31", "target": [{ "code": "F-05", "equivalence": "equivalent" }] },
+        { "code": "p1-sp32", "target": [{ "code": "F-26", "equivalence": "equivalent" }] },
+        { "code": "p1-sp33", "target": [{ "code": "F-08", "equivalence": "equivalent" }] },
+        { "code": "p1-sp34", "target": [{ "code": "F-27", "equivalence": "equivalent" }] },
+        { "code": "p1-sp35", "target": [{ "code": "F-16", "equivalence": "equivalent" }] },
+        { "code": "p1-sp36", "target": [{ "code": "F-12", "equivalence": "equivalent" }] },
+        { "code": "p1-sp37", "target": [{ "code": "F-15", "equivalence": "equivalent" }] },
+        { "code": "p1-sp38", "target": [{ "code": "F-18", "equivalence": "equivalent" }] },
+        { "code": "p1-sp39", "target": [{ "code": "F-32", "equivalence": "equivalent" }] },
+        { "code": "p1-sp40", "target": [{ "code": "F-24", "equivalence": "equivalent" }] },
+        { "code": "p1-sp41", "target": [{ "code": "F-25", "equivalence": "equivalent" }] },
+        { "code": "p1-sp42", "target": [{ "code": "F-47", "equivalence": "equivalent" }] },
+        { "code": "p1-sp43", "target": [{ "code": "F-67", "equivalence": "equivalent" }] },
+        {
+          "code": "p1-sp44",
+          "target": [
+            { "code": "F-53", "equivalence": "equivalent" },
+            { "code": "F-54", "equivalence": "equivalent" }
+          ]
+        },
+        {
+          "code": "p1-sp45",
+          "_comment": "corrigé: primary is F-61; F-49/F-50 also apply per issue table",
+          "target": [
+            { "code": "F-61", "equivalence": "equivalent" },
+            { "code": "F-49", "equivalence": "equivalent" },
+            { "code": "F-50", "equivalence": "equivalent" }
+          ]
+        },
+        { "code": "p1-sp46", "target": [{ "code": "F-22", "equivalence": "equivalent" }] },
+        {
+          "code": "p1-sp47",
+          "target": [
+            { "code": "F-55", "equivalence": "equivalent" },
+            { "code": "F-56", "equivalence": "equivalent" }
+          ]
+        },
+        { "code": "p1-sp48", "target": [{ "code": "F-19", "equivalence": "equivalent" }] },
+        { "code": "p1-sp49", "target": [{ "code": "F-20", "equivalence": "equivalent" }] },
+        { "code": "p1-sp50", "target": [{ "code": "F-64", "equivalence": "equivalent" }] },
+        { "code": "p1-sp51", "target": [{ "code": "F-61", "equivalence": "equivalent" }] },
+        { "code": "p1-sp52", "target": [{ "code": "F-17", "equivalence": "equivalent" }] },
+        { "code": "p1-sp53", "target": [{ "code": "F-34", "equivalence": "equivalent" }] },
+        { "code": "p1-sp54", "target": [{ "code": "F-37", "equivalence": "equivalent" }] },
+        { "code": "p1-sp55", "target": [{ "code": "F-03", "equivalence": "equivalent" }] },
+        { "code": "p1-sp56", "target": [{ "code": "F-43", "equivalence": "equivalent" }] },
+        { "code": "p1-sp57", "target": [{ "code": "F-44", "equivalence": "equivalent" }] },
+        { "code": "p1-sp58", "target": [{ "code": "F-28", "equivalence": "equivalent" }] },
+        { "code": "p1-sp59", "target": [{ "code": "F-65", "equivalence": "equivalent" }] },
+        { "code": "p1-sp60", "target": [{ "code": "F-31", "equivalence": "equivalent" }] },
+        { "code": "p1-sp61", "target": [{ "code": "F-46", "equivalence": "equivalent" }] },
+        { "code": "p1-sp63", "target": [{ "code": "F-63", "equivalence": "equivalent" }] },
+        { "code": "p1-sp64", "target": [{ "code": "F-60", "equivalence": "equivalent" }] },
+        { "code": "p1-sp65", "target": [{ "code": "F-23", "equivalence": "equivalent" }] },
+        {
+          "code": "p1-sp68",
+          "target": [
+            { "code": "F-89", "equivalence": "equivalent" },
+            { "code": "F-90", "equivalence": "equivalent" }
+          ]
+        },
+        { "code": "p2-sp1",  "target": [{ "code": "F-85", "equivalence": "equivalent" }] },
+        { "code": "p2-sp11", "target": [{ "code": "F-84", "equivalence": "equivalent" }] },
+        {
+          "code": "p2-sp13",
+          "target": [
+            { "code": "F-69", "equivalence": "equivalent" },
+            { "code": "F-70", "equivalence": "equivalent" },
+            { "code": "F-71", "equivalence": "equivalent" },
+            { "code": "F-72", "equivalence": "equivalent" }
+          ]
+        },
+        { "code": "p2-sp2",  "target": [{ "code": "F-73", "equivalence": "equivalent" }] },
+        {
+          "code": "p2-sp4",
+          "target": [
+            { "code": "F-74", "equivalence": "equivalent" },
+            { "code": "F-75", "equivalence": "equivalent" }
+          ]
+        },
+        {
+          "code": "p2-sp5",
+          "target": [
+            { "code": "F-76", "equivalence": "equivalent" },
+            { "code": "F-77", "equivalence": "equivalent" }
+          ]
+        },
+        {
+          "code": "p2-sp6",
+          "target": [
+            { "code": "F-82", "equivalence": "equivalent" },
+            { "code": "F-83", "equivalence": "equivalent" }
+          ]
+        },
+        {
+          "code": "p2-sp7",
+          "target": [
+            { "code": "F-80", "equivalence": "equivalent" },
+            { "code": "F-81", "equivalence": "equivalent" }
+          ]
+        },
+        {
+          "code": "p2-sp8",
+          "target": [
+            { "code": "F-78", "equivalence": "equivalent" },
+            { "code": "F-79", "equivalence": "equivalent" }
+          ]
+        },
+        { "code": "p3-sp1",  "target": [{ "code": "F-87", "equivalence": "equivalent" }] },
+        { "code": "p3-sp2",  "target": [{ "code": "F-88", "equivalence": "equivalent" }] },
+        { "code": "p3-sp3",  "target": [{ "code": "F-86", "equivalence": "equivalent" }] }
+      ]
+    }
+  ]
+}
