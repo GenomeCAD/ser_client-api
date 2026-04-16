@@ -225,21 +225,27 @@ class SeqoiaParser:
 
             if lien_key == "père":
                 rel_code = "FTH"
-                rel_display: Optional[str] = "father"
+                rel_display: Optional[str] = "père"
+                is_exact = True
             elif lien_key == "mère":
                 rel_code = "MTH"
-                rel_display = "mother"
+                rel_display = "mère"
+                is_exact = True
             elif lien_key == "autre":
-                # Level 1: exact match against ConceptMap
+                # Level 1: exact match against ConceptMap - relationship is certain
                 matched = translate_relationship(lien_name)
-                # Level 2: regex patterns for PII-containing free text
-                if not matched:
+                if matched:
+                    is_exact = True
+                else:
+                    # Level 2: regex inference - relationship is probable but not certain
                     matched = translate_relationship_by_regex(lien_name)
+                    is_exact = False
                 rel_code = matched if matched else "EXT"
                 rel_display = lien_name or None
             else:
                 rel_code = "FAMMEMB"
                 rel_display = lien_name or lien_key or None
+                is_exact = False
 
             birth_date = None
             birth_date_str = _get_optional_field(patient_info, "date_naissance")
@@ -260,6 +266,7 @@ class SeqoiaParser:
                 set_id=set_id,
                 relationship_code=rel_code,
                 relationship_display=rel_display,
+                relationship_is_exact=is_exact,
                 family_name=_get_optional_field(patient_info, "nom"),
                 given_name=_get_optional_field(patient_info, "prenom"),
                 birth_date=birth_date,

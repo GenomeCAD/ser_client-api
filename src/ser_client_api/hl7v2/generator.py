@@ -5,10 +5,12 @@ Transforms business models into HL7v2 format using hl7apy
 
 import base64
 import hashlib
+import importlib.resources
+import json
 import os
 import uuid
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from hl7apy import load_message_profile
 from hl7apy.consts import VALIDATION_LEVEL
@@ -36,6 +38,42 @@ _V3_ROLE_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
 
 # Match confidence system URI (used in NK1-3 CWE.6 for relationship match scoring)
 _MATCH_CONFIDENCE_SYSTEM = "http://www.genomecad.fr/CodeSystem/MatchConfidence"
+
+_inverse_table: Optional[tuple[dict, dict]] = None
+
+
+def _get_inverse_table() -> tuple[dict[str, str | tuple[str, str]], dict[str, str]]:
+    global _inverse_table
+    if _inverse_table is None:
+        f = (
+            importlib.resources.files("ser_client_api.vocabularies.v3")
+            / "v3-inverse-relationships.json"
+        )
+        data = json.loads(f.read_text(encoding="utf-8"))
+        inverse_code: dict[str, str | tuple[str, str]] = {}
+        for entry in data["inverses"]:
+            code = entry[0]
+            if len(entry) == 2:
+                inverse_code[code] = entry[1]
+            else:
+                inverse_code[code] = (entry[1], entry[2])
+        _inverse_table = (inverse_code, data["labels"])
+    return _inverse_table
+
+
+def _resolve_inverse_code(nok_code: str, patient_sex: Optional[str]) -> Optional[str]:
+    inverse_code, _ = _get_inverse_table()
+    inverse = inverse_code.get(nok_code)
+    if inverse is None:
+        return None
+    if isinstance(inverse, tuple):
+        sex = (patient_sex or "").upper()
+        if sex == "F":
+            return inverse[1]
+        if sex == "M":
+            return inverse[0]
+        return None
+    return inverse
 
 
 class HL7v2Generator:
@@ -176,7 +214,7 @@ class HL7v2Generator:
             pr_nok = msg.add_group("ORU_R01_PATIENT_RESULT")
             self._populate_pid_for_nok(pr_nok, nok, parsed_report_data.report_id)
             self._populate_nk1_for_nok(
-                pr_nok, nok, parsed_report_data.patient, nok_list
+                pr_nok, nok, parsed_report_data.patient
             )
             self._populate_pv1(
                 pr_nok,
@@ -537,26 +575,23 @@ class HL7v2Generator:
         patient_result,
         this_nok: RelatedPersonData,
         main_patient: PatientData,
-        all_nok: List[RelatedPersonData],
     ) -> None:
-        """Populate NK1 segments with inverse relationships for a NOK's PATIENT_RESULT group.
+        """Populate the inverse NK1 segment for a NOK's PATIENT_RESULT group.
 
-        From this NOK's perspective:
-        - The main_patient is their child (CHILD)
-        - The other parent (if any) is their spouse (SPS)
+        Emitted only when the relationship was resolved with full certainty (is_exact=True)
+        and the main patient's sex is known for sex-dependent codes.
 
         :param patient_result: PATIENT_RESULT group to populate
-        :param this_nok: The NOK whose PID group we are populating
-        :type this_nok: RelatedPersonData
-        :param main_patient: Main patient (main_patient) data
-        :type main_patient: PatientData
-        :param all_nok: Full list of all NOK (to find the other parent)
-        :type all_nok: List[RelatedPersonData]
+        :param this_nok: The NOK whose PATIENT_RESULT group we are populating
+        :param main_patient: Main patient data
         """
-        # Inverse relationships only apply to parents: father sees child + co-parent (spouse)
-        if this_nok.relationship_code not in ("FTH", "MTH"):
+        if not this_nok.relationship_is_exact:
+            return
+        inverse_code = _resolve_inverse_code(this_nok.relationship_code, main_patient.sex)
+        if inverse_code is None:
             return
 
+        _, role_labels = _get_inverse_table()
         patient_group = patient_result.oru_r01_patient
         set_id = 1
 
@@ -565,35 +600,15 @@ class HL7v2Generator:
         set_id += 1
         if main_patient.patient_family_name and main_patient.patient_given_name:
             nk1.nk1_2 = f"{main_patient.patient_family_name}^{main_patient.patient_given_name}^^^^^L"
+        label = role_labels.get(inverse_code, inverse_code.lower())
         nk1.nk1_3 = (
-            f"CHILD^child^{_V3_ROLE_CODE_SYSTEM}"
+            f"{inverse_code}^{label}^{_V3_ROLE_CODE_SYSTEM}"
             f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
         )
         if main_patient.sex:
             nk1.nk1_15 = main_patient.sex
         if main_patient.birth_date:
             nk1.nk1_16 = main_patient.hl7_birth_date
-
-        for other_nok in all_nok:
-            if other_nok is this_nok:
-                continue
-            if other_nok.relationship_code not in ("FTH", "MTH"):
-                continue
-            nk1_other = patient_group.add_segment("NK1")
-            nk1_other.nk1_1 = str(set_id)
-            set_id += 1
-            if other_nok.family_name and other_nok.given_name:
-                nk1_other.nk1_2 = (
-                    f"{other_nok.family_name}^{other_nok.given_name}^^^^^L"
-                )
-            nk1_other.nk1_3 = (
-                f"SPS^spouse^{_V3_ROLE_CODE_SYSTEM}"
-                f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
-            )
-            if other_nok.sex:
-                nk1_other.nk1_15 = other_nok.sex
-            if other_nok.birth_date:
-                nk1_other.nk1_16 = other_nok.hl7_birth_date
 
     def _populate_obx_files(
         self,
