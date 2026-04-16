@@ -93,6 +93,14 @@ class TestTranslateRelationshipByRegex:
         """'mère de Sophie' matches MTH via regex."""
         assert translate_relationship_by_regex("mère de Sophie") == "MTH"
 
+    def test_grand_pere_does_not_match_fth(self):
+        """'oncle très éloigné côté grand-père maternel' must NOT resolve to FTH."""
+        assert translate_relationship_by_regex("oncle très éloigné côté grand-père maternel") is None
+
+    def test_grand_mere_does_not_match_mth(self):
+        """'grand-mère de Sophie' must NOT resolve to MTH."""
+        assert translate_relationship_by_regex("grand-mère de Sophie") is None
+
     def test_no_match_returns_none(self):
         """A string matching no pattern returns None."""
         assert translate_relationship_by_regex("parenté inconnue XYZ") is None
@@ -120,19 +128,17 @@ class TestParserAutreLogic:
         assert nok.relationship_display == "parenté inconnue"
 
     def test_autre_case_insensitive_match(self):
-        """Matching lien.name against the table is case-insensitive."""
         data = _make_prescription("autre", "FRÈRE")
         result = SeqoiaParser().parse(data)
         nok = result.next_of_kin[0]
         assert nok.relationship_code == "BRO"
 
-    def test_pere_sets_fth_and_father_display(self):
-        """lien.key='père' → FTH with 'father' display, regardless of lien.name."""
+    def test_pere_sets_fth_and_pere_display(self):
         data = _make_prescription("père", "Père")
         result = SeqoiaParser().parse(data)
         nok = result.next_of_kin[0]
         assert nok.relationship_code == "FTH"
-        assert nok.relationship_display == "father"
+        assert nok.relationship_display == "père"
 
     def test_patient_key_is_skipped(self):
         """lien.key='patient' entries are skipped (not added to next_of_kin)."""

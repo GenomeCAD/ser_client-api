@@ -102,22 +102,22 @@
   {
     "libelle": "Mère de ${Prénom} et ${Prénom}",
     "code": "MTH",
-    "pattern": "(?i)m[eè]re de (.+) et (.+)"
+    "pattern": "(?i)(?<!-)m[eè]re de (.+) et (.+)"
   },
   {
     "libelle": "mère de ${Nom} ${Prénom}",
     "code": "MTH",
-    "pattern": "(?i)m[eè]re de (.+)\\s+(.+)"
+    "pattern": "(?i)(?<!-)m[eè]re de (.+)\\s+(.+)"
   },
   {
     "libelle": "MERE DE ${Prénom}",
     "code": "MTH",
-    "pattern": "(?i)m[eè]re de (.+)"
+    "pattern": "(?i)(?<!-)m[eè]re de (.+)"
   },
   {
     "libelle": "mère d'${Prénom}",
     "code": "MTH",
-    "pattern": "(?i)m[eè]re d['\u2019](.+)"
+    "pattern": "(?i)(?<!-)m[eè]re d['\u2019](.+)"
   },
   {
     "libelle": "Sœur de ${Prénom} et ${Prénom}",
@@ -167,11 +167,11 @@
   {
     "libelle": "PERE DE ${Prénom}",
     "code": "FTH",
-    "pattern": "(?i)p[eè]re de (.+)"
+    "pattern": "(?i)(?<!-)p[eè]re de (.+)"
   },
   {
     "libelle": "père ${Prénom}",
     "code": "FTH",
-    "pattern": "(?i)p[eè]re (.+)"
+    "pattern": "(?i)(?<!-)p[eè]re (.+)"
   }
 ]
