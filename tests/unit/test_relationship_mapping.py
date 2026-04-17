@@ -153,10 +153,9 @@ class TestParserAutreLogic:
         assert nok.relationship_code == "BRO"
         assert nok.relationship_display == "frère de Lucas"  # original text preserved (may contain PII)
 
-    def test_set_id_is_sequential(self):
+    def test_set_id_is_sequential(self, minimal_prescription_json):
         """set_id is assigned sequentially starting at 1."""
-        from tests.conftest import MINIMAL_PRESCRIPTION_JSON
-        result = SeqoiaParser().parse(MINIMAL_PRESCRIPTION_JSON)
+        result = SeqoiaParser().parse(minimal_prescription_json)
         set_ids = [nok.set_id for nok in result.next_of_kin]
         assert set_ids == [1, 2]
 
