@@ -1,5 +1,40 @@
 [
   {
+    "libelle": "frère de la mère de ${Prénom}",
+    "code": "MUNCLE",
+    "pattern": "(?i)fr[eè]re de la m[eè]re de (.+)"
+  },
+  {
+    "libelle": "sœur de la mère de ${Prénom}",
+    "code": "MAUNT",
+    "pattern": "(?i)s(?:oe|\\u0153)ur de la m[eè]re de (.+)"
+  },
+  {
+    "libelle": "sœur du père de ${Prénom}",
+    "code": "PAUNT",
+    "pattern": "(?i)s(?:oe|\\u0153)ur du p[eè]re de (.+)"
+  },
+  {
+    "libelle": "fils du frère de ${Prénom}",
+    "code": "NEPHEW",
+    "pattern": "(?i)fils du fr[eè]re de (.+)"
+  },
+  {
+    "libelle": "fils de la sœur de ${Prénom}",
+    "code": "NEPHEW",
+    "pattern": "(?i)fils de la s(?:oe|\\u0153)ur de (.+)"
+  },
+  {
+    "libelle": "fille du frère de ${Prénom}",
+    "code": "NIECE",
+    "pattern": "(?i)fille du fr[eè]re de (.+)"
+  },
+  {
+    "libelle": "fille de la sœur de ${Prénom}",
+    "code": "NIECE",
+    "pattern": "(?i)fille de la s(?:oe|\\u0153)ur de (.+)"
+  },
+  {
     "libelle": "cousine paternelle du père de ${Civilité} ${Nom} ${Prénom}",
     "code": "PCOUSN",
     "pattern": "(?i)cousine paternelle du p[eè]re de (.+) (.+)\\s+(.+)"
@@ -33,6 +68,11 @@
     "libelle": "Frère du père ${Prénom}",
     "code": "UNCLE",
     "pattern": "(?i)fr[eè]re du p[eè]re (.+)"
+  },
+  {
+    "libelle": "[[intermediate-node-guard]] - two kinship words connected by de/du -> EXT",
+    "code": null,
+    "pattern": "(?i)\\b(m[eè]re|p[eè]re|fr[eè]re|s(?:oe|\\u0153)ur|fils|fille|oncle|tante|cousin[e]?|neveu|ni[eè]ce)\\s+(?:de\\s+(?:la\\s+|l['\u2019])?|du\\s+)(m[eè]re|p[eè]re|fr[eè]re|s(?:oe|\\u0153)ur|fils|fille|oncle|tante|cousin[e]?|neveu|ni[eè]ce)"
   },
   {
     "libelle": "nièce, fille de ${Prénom}",
