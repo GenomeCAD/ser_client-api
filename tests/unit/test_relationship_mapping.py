@@ -1,9 +1,16 @@
 """Unit tests for SeqOIA pedigree relationship mapping (issue #33)."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from ser_client_api.vocabularies.seqoia import translate_relationship, translate_relationship_by_regex
 from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser
+
+_REGEX_EXAMPLES = json.loads(
+    (Path(__file__).parent.parent / "fixtures" / "relationship_regex_examples.json").read_text(encoding="utf-8")
+)
 
 class TestTranslateRelationship:
     def test_known_lowercase_entry(self):
@@ -27,6 +34,7 @@ class TestTranslateRelationship:
     def test_empty_string_returns_none(self):
         """Empty input returns None without raising."""
         assert translate_relationship("") is None
+
 
 def _make_prescription(lien_key, lien_name):
     """Return a minimal prescription JSON with one related person."""
@@ -77,28 +85,16 @@ def _make_prescription(lien_key, lien_name):
 
 
 class TestTranslateRelationshipByRegex:
-    def test_pii_pattern_brother(self):
-        """'Frère de Lucas' (PII) matches BRO via regex."""
-        assert translate_relationship_by_regex("Frère de Lucas") == "BRO"
-
-    def test_pii_pattern_paternal_uncle(self):
-        """'frère du père de Lucas' matches PUNCLE, not the generic BRO."""
-        assert translate_relationship_by_regex("frère du père de Lucas") == "PUNCLE"
-
-    def test_ordering_puncle_before_uncle(self):
-        """'Frère du père Xavier' matches UNCLE (not PUNCLE, not BRO)."""
-        assert translate_relationship_by_regex("Frère du père Xavier") == "UNCLE"
-
-    def test_pii_pattern_mother(self):
-        """'mère de Sophie' matches MTH via regex."""
-        assert translate_relationship_by_regex("mère de Sophie") == "MTH"
+    @pytest.mark.parametrize("libelle,expected_code", _REGEX_EXAMPLES)
+    def test_regex_resolution(self, libelle, expected_code):
+        assert translate_relationship_by_regex(libelle) == expected_code
 
     def test_grand_pere_does_not_match_fth(self):
-        """'oncle très éloigné côté grand-père maternel' must NOT resolve to FTH."""
+        """'grand-père' compound must NOT resolve to FTH via the generic père pattern."""
         assert translate_relationship_by_regex("oncle très éloigné côté grand-père maternel") is None
 
     def test_grand_mere_does_not_match_mth(self):
-        """'grand-mère de Sophie' must NOT resolve to MTH."""
+        """'grand-mère' compound must NOT resolve to MTH via the generic mère pattern."""
         assert translate_relationship_by_regex("grand-mère de Sophie") is None
 
     def test_no_match_returns_none(self):
@@ -109,6 +105,9 @@ class TestTranslateRelationshipByRegex:
         """Empty input returns None without raising."""
         assert translate_relationship_by_regex("") is None
 
+    def test_sentinel_blocks_unrecognised_multi_hop(self):
+        """Two kinship words chained by de/du with no explicit pattern -> None (-> EXT)."""
+        assert translate_relationship_by_regex("frère de l'oncle de Paul") is None
 
 class TestParserAutreLogic:
     def test_autre_with_matched_libelle_uses_table_code(self):
