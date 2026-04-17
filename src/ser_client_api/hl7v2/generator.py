@@ -28,6 +28,7 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
+from ser_client_api.vocabularies.gipcad import v3_display
 
 # GIP-CPS OID for "type_identifiant_structure"
 OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
@@ -214,7 +215,7 @@ class HL7v2Generator:
             pr_nok = msg.add_group("ORU_R01_PATIENT_RESULT")
             self._populate_pid_for_nok(pr_nok, nok, parsed_report_data.report_id)
             self._populate_nk1_for_nok(
-                pr_nok, nok, parsed_report_data.patient
+                pr_nok, nok, parsed_report_data.patient, nok_list
             )
             self._populate_pv1(
                 pr_nok,
@@ -575,6 +576,7 @@ class HL7v2Generator:
         patient_result,
         this_nok: RelatedPersonData,
         main_patient: PatientData,
+        all_nok: List[RelatedPersonData],
     ) -> None:
         """Populate the inverse NK1 segment for a NOK's PATIENT_RESULT group.
 
@@ -609,6 +611,26 @@ class HL7v2Generator:
             nk1.nk1_15 = main_patient.sex
         if main_patient.birth_date:
             nk1.nk1_16 = main_patient.hl7_birth_date
+
+        for other_nok in all_nok:
+            if other_nok is this_nok:
+                continue
+            nk1_other = patient_group.add_segment("NK1")
+            nk1_other.nk1_1 = str(set_id)
+            set_id += 1
+            if other_nok.family_name and other_nok.given_name:
+                nk1_other.nk1_2 = (
+                    f"{other_nok.family_name}^{other_nok.given_name}^^^^^L"
+                )
+            nk1_other.nk1_3 = (
+                f"SPS^{v3_display('SPS') or ''}^{_V3_ROLE_CODE_SYSTEM}"
+                f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
+            )
+            if other_nok.sex:
+                nk1_other.nk1_15 = other_nok.sex
+            if other_nok.birth_date:
+                nk1_other.nk1_16 = other_nok.hl7_birth_date
+
 
     def _populate_obx_files(
         self,
