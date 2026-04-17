@@ -2,15 +2,11 @@
 HL7v2 domain models for genomics report forwarding.
 """
 
-from .generator import HL7v2Generator
-from .institution_config import InstitutionConfig
-from .utils import generate_sidecars
-from .institutions import SEQOIA, AURAGEN, PERIGENOMED
 from .domain_models import (
     CareTeamData,
     CompositionData,
-    ConsentData,
     ConditionData,
+    ConsentData,
     ObservationData,
     PatientData,
     PeriodData,
@@ -18,6 +14,10 @@ from .domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
+from .generator import HL7v2Generator
+from .institution_config import InstitutionConfig
+from .institutions import AURAGEN, PERIGENOMED, SEQOIA
+from .utils import generate_sidecars
 
 __all__ = [
     "HL7v2Generator",

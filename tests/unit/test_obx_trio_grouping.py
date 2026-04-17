@@ -13,8 +13,6 @@ the correct PATIENT_RESULT group and that their OBX-5 paths are correct.
 import tempfile
 from pathlib import Path
 
-import pytest
-
 
 def _parse_patient_result_obx_refs(hl7_message: str) -> dict[str, list[str]]:
     """Return a dict mapping PID set_id → list of OBX-5 file references.
@@ -40,7 +38,6 @@ def _parse_patient_result_obx_refs(hl7_message: str) -> dict[str, list[str]]:
 
 
 class TestMultiPidTrioGrouping:
-
     def test_main_patient_subdir_in_main_patient_group(self, generator, composition):
         """Files in the main_patient's id_anon folder appear in PID set_id=1 group."""
         with tempfile.TemporaryDirectory() as tmp:

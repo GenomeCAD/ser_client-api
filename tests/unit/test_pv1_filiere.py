@@ -4,10 +4,8 @@ import copy
 import tempfile
 from pathlib import Path
 
-import pytest
-
-from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser
 from ser_client_api.hl7v2.generator import _PFMG_FILIERE_SYSTEM
+from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser
 
 
 def _pv1_14(hl7_message: str) -> str:
@@ -28,20 +26,13 @@ def _generate(generator, composition):
 
 
 class TestPV1Filiere:
-
     def test_pv1_14_full_cwe_value(self, generator, composition):
         hl7 = _generate(generator, composition)
         pv1_14 = _pv1_14(hl7)
-        expected = (
-            "F-31"
-            "^Angioedèmes bradykiniques héréditaires [MaRIH]"
-            f"^{_PFMG_FILIERE_SYSTEM}"
-        )
+        expected = f"F-31^Angioedèmes bradykiniques héréditaires [MaRIH]^{_PFMG_FILIERE_SYSTEM}"
         assert pv1_14 == expected
 
-    def test_pv1_14_absent_for_unknown_filiere_key(
-        self, generator, institution, minimal_prescription_json
-    ):
+    def test_pv1_14_absent_for_unknown_filiere_key(self, generator, institution, minimal_prescription_json):
         data = copy.deepcopy(minimal_prescription_json)
         data["preindication"]["key"] = "p1-sp99"  # not in the mapping table
         composition = SeqoiaParser().parse(data)
