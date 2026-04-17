@@ -270,7 +270,7 @@
         {"code": "grand père",                                         "target": [{"code": "GRFTH",    "equivalence": "equivalent"}]},
         {"code": "grand père mat",                                     "target": [{"code": "MGRFTH",   "equivalence": "equivalent"}]},
         {"code": "grand père maternel",                                "target": [{"code": "MGRFTH",   "equivalence": "equivalent"}]},
-        {"code": "grand père paternel",                                "target": [{"code": "MGRFTH",   "equivalence": "equivalent"}]},
+        {"code": "grand père paternel",                                "target": [{"code": "PGRFTH",   "equivalence": "equivalent"}]},
         {"code": "grand-mère",                                         "target": [{"code": "GRMTH",    "equivalence": "equivalent"}]},
         {"code": "grand-mère maternelle",                              "target": [{"code": "MGRMTH",   "equivalence": "equivalent"}]},
         {"code": "grand-mère paternelle",                              "target": [{"code": "PGRMTH",   "equivalence": "equivalent"}]},
