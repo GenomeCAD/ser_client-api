@@ -155,6 +155,8 @@ class RelatedPersonData:
 
     set_id: int  # NK1-1: 1=père, 2=mère
     relationship_code: str  # NK1-3 CWE.1: HL7v3 code e.g. FTH, MTH
+    relationship_display: Optional[str] = None  # NK1-3 CWE.2: display e.g. "père"
+    relationship_is_exact: bool = True  # False for regex/EXT - suppresses inverse NK1
     family_name: Optional[str] = None
     given_name: Optional[str] = None
     birth_date: Optional[date] = None  # NK1-16

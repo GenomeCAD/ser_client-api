@@ -39,6 +39,7 @@ include = [
     "src/ser_client_api/hl7v2/auragen/examples/**",
     "src/ser_client_api/hl7v2/auragen/schemas/**",
     "src/ser_client_api/vocabularies/gipcad/**",
+    "src/ser_client_api/vocabularies/v3/**",
     "src/ser_client_api/vocabularies/seqoia/**",
 ]
 

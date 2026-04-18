@@ -1,0 +1,217 @@
+[
+  {
+    "libelle": "frère de la mère de ${Prénom}",
+    "code": "MUNCLE",
+    "pattern": "(?i)fr[eè]re de la m[eè]re de (.+)"
+  },
+  {
+    "libelle": "sœur de la mère de ${Prénom}",
+    "code": "MAUNT",
+    "pattern": "(?i)s(?:oe|\\u0153)ur de la m[eè]re de (.+)"
+  },
+  {
+    "libelle": "sœur du père de ${Prénom}",
+    "code": "PAUNT",
+    "pattern": "(?i)s(?:oe|\\u0153)ur du p[eè]re de (.+)"
+  },
+  {
+    "libelle": "fils du frère de ${Prénom}",
+    "code": "NEPHEW",
+    "pattern": "(?i)fils du fr[eè]re de (.+)"
+  },
+  {
+    "libelle": "fils de la sœur de ${Prénom}",
+    "code": "NEPHEW",
+    "pattern": "(?i)fils de la s(?:oe|\\u0153)ur de (.+)"
+  },
+  {
+    "libelle": "fille du frère de ${Prénom}",
+    "code": "NIECE",
+    "pattern": "(?i)fille du fr[eè]re de (.+)"
+  },
+  {
+    "libelle": "fille de la sœur de ${Prénom}",
+    "code": "NIECE",
+    "pattern": "(?i)fille de la s(?:oe|\\u0153)ur de (.+)"
+  },
+  {
+    "libelle": "cousine paternelle du père de ${Civilité} ${Nom} ${Prénom}",
+    "code": "PCOUSN",
+    "pattern": "(?i)cousine paternelle du p[eè]re de (.+) (.+)\\s+(.+)"
+  },
+  {
+    "libelle": "cousine du père ${Prénom} et demi cousine de la mère ${Prénom}",
+    "code": "COUSN",
+    "pattern": "(?i)cousine du p[eè]re (.+) et demi cousine de la m[eè]re (.+)"
+  },
+  {
+    "libelle": "cousin de la mère de ${Prénom}",
+    "code": "MCOUSN",
+    "pattern": "(?i)cousin de la m[eè]re de (.+)"
+  },
+  {
+    "libelle": "cousine de la mère de ${Prénom}",
+    "code": "MCOUSN",
+    "pattern": "(?i)cousine de la m[eè]re de (.+)"
+  },
+  {
+    "libelle": "COUSIN MATERNEL / FILS DE ${Civilité} ${Nom} ${Prénom}",
+    "code": "MCOUSN",
+    "pattern": "(?i)cousin maternel.*fils\\sde\\s+(.+)\\s+(.+)\\s+(.+)"
+  },
+  {
+    "libelle": "frère du père de ${Prénom}",
+    "code": "PUNCLE",
+    "pattern": "(?i)fr[eè]re du p[eè]re de (.+)"
+  },
+  {
+    "libelle": "Frère du père ${Prénom}",
+    "code": "UNCLE",
+    "pattern": "(?i)fr[eè]re du p[eè]re (.+)"
+  },
+  {
+    "libelle": "[[intermediate-node-guard]] - two kinship words connected by de/du -> EXT",
+    "code": null,
+    "pattern": "(?i)\\b(m[eè]re|p[eè]re|fr[eè]re|s(?:oe|\\u0153)ur|fils|fille|oncle|tante|cousin[e]?|neveu|ni[eè]ce)\\s+(?:de\\s+(?:la\\s+|l['\u2019])?|du\\s+)(m[eè]re|p[eè]re|fr[eè]re|s(?:oe|\\u0153)ur|fils|fille|oncle|tante|cousin[e]?|neveu|ni[eè]ce)"
+  },
+  {
+    "libelle": "nièce, fille de ${Prénom}",
+    "code": "NIECE",
+    "pattern": "(?i)ni[eè]ce.*,.*fille de (.+)"
+  },
+  {
+    "libelle": "petit fils de ${Prénom} - fils de ${Prénom}",
+    "code": "GRNDSON",
+    "pattern": "(?i)petit[- ]fils de (.+).*fils de (.+)"
+  },
+  {
+    "libelle": "petit-fils de ${Prénom}",
+    "code": "GRNDSON",
+    "pattern": "(?i)petit[- ]fils de (.+)"
+  },
+  {
+    "libelle": "demi sœur de ${Prénom} meme mere",
+    "code": "HSIS",
+    "pattern": "(?i)demi s(?:oe|\\u0153)ur de (.+) m[e\\xea]me m[eè]re"
+  },
+  {
+    "libelle": "Epouse du cas index, mère de ${Prénom}",
+    "code": "MTH",
+    "pattern": "(?i)epouse du cas index.*m[eè]re de (.+)"
+  },
+  {
+    "libelle": "Epouse de ${Prénom}, mère de ${Prénom}",
+    "code": "MTH",
+    "pattern": "(?i)epouse de (.+),.*m[eè]re de (.+)"
+  },
+  {
+    "libelle": "Epouse (mère de ${Prénom})",
+    "code": "MTH",
+    "pattern": "(?i)epouse.*m[eè]re de (.+)"
+  },
+  {
+    "libelle": "Gendre (père d'${Prénom})",
+    "code": "FTH",
+    "pattern": "(?i)gendre.*p[eè]re d['\u2019](.+)"
+  },
+  {
+    "libelle": "Frère de ${Prénom}, Fils de ${Civilité} ${Nom}",
+    "code": "SON",
+    "pattern": "(?i)fr[eè]re de (.+),.*fils de (.+) (.+)"
+  },
+  {
+    "libelle": "frère de ${Prénom} et ${Prénom}",
+    "code": "BRO",
+    "pattern": "(?i)fr[eè]re de (.+) et (.+)"
+  },
+  {
+    "libelle": "frère de ${Prénom} ${Nom}",
+    "code": "BRO",
+    "pattern": "(?i)fr[eè]re de (.+)\\s+(.+)"
+  },
+  {
+    "libelle": "FRERE DE ${Prénom}",
+    "code": "BRO",
+    "pattern": "(?i)fr[eè]re de (.+)"
+  },
+  {
+    "libelle": "Frère ${Prénom}",
+    "code": "BRO",
+    "pattern": "(?i)fr[eè]re (.+)"
+  },
+  {
+    "libelle": "Mère de ${Prénom} et ${Prénom}",
+    "code": "MTH",
+    "pattern": "(?i)(?<!-)m[eè]re de (.+) et (.+)"
+  },
+  {
+    "libelle": "mère de ${Nom} ${Prénom}",
+    "code": "MTH",
+    "pattern": "(?i)(?<!-)m[eè]re de (.+)\\s+(.+)"
+  },
+  {
+    "libelle": "MERE DE ${Prénom}",
+    "code": "MTH",
+    "pattern": "(?i)(?<!-)m[eè]re de (.+)"
+  },
+  {
+    "libelle": "mère d'${Prénom}",
+    "code": "MTH",
+    "pattern": "(?i)(?<!-)m[eè]re d['\u2019](.+)"
+  },
+  {
+    "libelle": "Sœur de ${Prénom} et ${Prénom}",
+    "code": "SIS",
+    "pattern": "(?i)s(?:oe|\\u0153)ur de (.+) et (.+)"
+  },
+  {
+    "libelle": "SOEUR DE ${Prénom}",
+    "code": "SIS",
+    "pattern": "(?i)s(?:oe|\\u0153)ur de (.+)"
+  },
+  {
+    "libelle": "soeur d ${Prénom}",
+    "code": "SIS",
+    "pattern": "(?i)s(?:oe|\\u0153)ur d (.+)"
+  },
+  {
+    "libelle": "Cousine de ${Prénom}",
+    "code": "COUSN",
+    "pattern": "(?i)cousine de (.+)"
+  },
+  {
+    "libelle": "Fille de ${Prénom}",
+    "code": "DAU",
+    "pattern": "(?i)fille de (.+)"
+  },
+  {
+    "libelle": "Fils de ${Prénom} et ${Prénom} ${Nom}",
+    "code": "SON",
+    "pattern": "(?i)fils de (.+) et (.+)\\s+(.+)"
+  },
+  {
+    "libelle": "fils de ${Nom} ${Prénom}",
+    "code": "SON",
+    "pattern": "(?i)fils de (.+)\\s+(.+)"
+  },
+  {
+    "libelle": "fils de ${Prénom}",
+    "code": "SON",
+    "pattern": "(?i)fils de (.+)"
+  },
+  {
+    "libelle": "géniteur de ${Nom} ${Prénom}",
+    "code": "FTH",
+    "pattern": "(?i)g[eé]niteur de (.+)\\s+(.+)"
+  },
+  {
+    "libelle": "PERE DE ${Prénom}",
+    "code": "FTH",
+    "pattern": "(?i)(?<!-)p[eè]re de (.+)"
+  },
+  {
+    "libelle": "père ${Prénom}",
+    "code": "FTH",
+    "pattern": "(?i)(?<!-)p[eè]re (.+)"
+  }
+]
