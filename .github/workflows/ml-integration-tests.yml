@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ".[ml]"
+          pip install ".[dev,ml]"
 
       - name: Run ML integration tests
         run: |
-          pytest tests/integration -v
+          python -m pytest tests/integration -v
