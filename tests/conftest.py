@@ -1,7 +1,8 @@
 """Shared fixtures for ser_client_api tests."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 import ser_client_api
 from ser_client_api.hl7v2 import HL7v2Generator, InstitutionConfig
@@ -107,10 +108,7 @@ def institution():
 
 @pytest.fixture(scope="session")
 def generator(institution):
-    profiles_dir = (
-        Path(ser_client_api.__file__).parent
-        / "hl7v2" / "gipcad" / "profiles" / "v000_compiled"
-    )
+    profiles_dir = Path(ser_client_api.__file__).parent / "hl7v2" / "gipcad" / "profiles" / "v000_compiled"
     return HL7v2Generator(
         profile_path=str(profiles_dir / "oru_r01_lab36"),
         institution=institution,

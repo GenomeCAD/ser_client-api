@@ -21,6 +21,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install ".[dev]"
 
+      - name: Run linter
+        run: |
+          pip install ruff
+          ruff check .
+          ruff format --check .
+
       - name: Run unit tests
         run: |
           pytest tests/unit

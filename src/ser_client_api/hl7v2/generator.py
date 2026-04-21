@@ -10,12 +10,13 @@ import json
 import os
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 from hl7apy import load_message_profile
 from hl7apy.consts import VALIDATION_LEVEL
 from hl7apy.core import Message
-from ser_client_api.hl7v2.institution_config import InstitutionConfig
+
 from ser_client_api.hl7v2.domain_models import (
     CareTeamData,
     CompositionData,
@@ -28,7 +29,7 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
-from ser_client_api.vocabularies.gipcad import v3_display
+from ser_client_api.hl7v2.institution_config import InstitutionConfig
 
 # GIP-CPS OID for "type_identifiant_structure"
 OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE = "1.2.250.1.71.4.2.2"
@@ -46,10 +47,7 @@ _inverse_table: Optional[tuple[dict, dict]] = None
 def _get_inverse_table() -> tuple[dict[str, str | tuple[str, str]], dict[str, str]]:
     global _inverse_table
     if _inverse_table is None:
-        f = (
-            importlib.resources.files("ser_client_api.vocabularies.v3")
-            / "v3-inverse-relationships.json"
-        )
+        f = importlib.resources.files("ser_client_api.vocabularies.v3") / "v3-inverse-relationships.json"
         data = json.loads(f.read_text(encoding="utf-8"))
         inverse_code: dict[str, str | tuple[str, str]] = {}
         for entry in data["inverses"]:
@@ -145,9 +143,7 @@ class HL7v2Generator:
         self.message_profile = load_message_profile(profile_path)
         self.institution = institution
 
-    def generate(
-        self, parsed_report_data: CompositionData, files_directory: str = None
-    ) -> str:
+    def generate(self, parsed_report_data: CompositionData, files_directory: str = None) -> str:
         """Generate HL7v2 ORU_R01 message from GenomicsReport.
 
         :param parsed_report_data: Business model containing all parsed report data
@@ -175,14 +171,9 @@ class HL7v2Generator:
 
         pr_main_patient = msg.add_group("ORU_R01_PATIENT_RESULT")
 
-        self._populate_pid(
-            pr_main_patient, parsed_report_data.patient, parsed_report_data.report_id
-        )
+        self._populate_pid(pr_main_patient, parsed_report_data.patient, parsed_report_data.report_id)
 
-        if (
-            parsed_report_data.consent
-            and parsed_report_data.consent.is_data_reusable_for_research
-        ):
+        if parsed_report_data.consent and parsed_report_data.consent.is_data_reusable_for_research:
             self._populate_con(pr_main_patient, parsed_report_data.consent)
 
         if nok_list:
@@ -214,9 +205,7 @@ class HL7v2Generator:
         for nok in nok_list:
             pr_nok = msg.add_group("ORU_R01_PATIENT_RESULT")
             self._populate_pid_for_nok(pr_nok, nok, parsed_report_data.report_id)
-            self._populate_nk1_for_nok(
-                pr_nok, nok, parsed_report_data.patient
-            )
+            self._populate_nk1_for_nok(pr_nok, nok, parsed_report_data.patient)
             self._populate_pv1(
                 pr_nok,
                 parsed_report_data.analysis,
@@ -297,16 +286,17 @@ class HL7v2Generator:
             f"{analysis_id}^^^{self.institution.lab_name}"
             f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^VN"
         )
-        visit_group.pv1.admit_date_time = self._format_to_hl7_timestamp(
-            date_prelevement
-        )
+        visit_group.pv1.admit_date_time = self._format_to_hl7_timestamp(date_prelevement)
         visit_group.pv1.discharge_date_time = visit_group.pv1.admit_date_time
 
     def _populate_sft(self, msg: Message) -> None:
         # SFT.1	Software Vendor Organization
-        msg.sft.software_vendor_organization = (
-            f"{self.institution.facility_name}^L^^^^ASIP-SANTE-ST&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}&ISO^FINEJ^^^{self.institution.facility_finess_ej}"
+        sft_org = (
+            f"{self.institution.facility_name}^L^^^^ASIP-SANTE-ST"
+            f"&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}&ISO^FINEJ"
+            f"^^^{self.institution.facility_finess_ej}"
         )
+        msg.sft.software_vendor_organization = sft_org
         # SFT.3	Software Product Name
         msg.sft.software_product_name = self.institution.software_name
 
@@ -331,7 +321,8 @@ class HL7v2Generator:
         )
         # MSH-4: Sending Facility
         msg.msh.sending_facility = (
-            f"{self.institution.facility_name}^{self.institution.facility_finess}^{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}"
+            f"{self.institution.facility_name}^{self.institution.facility_finess}"
+            f"^{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}"
         )
         # MSH-5: Receiving Application
         msg.msh.receiving_application = self.institution.receiving_application
@@ -340,9 +331,7 @@ class HL7v2Generator:
 
         # MSH-7: Date/Time of Message
         # Format now datetime as HL7v2 timestamp (YYYYMMDDHHMMSS.mmm+ZZZZ)
-        msg.msh.date_time_of_message = self._format_to_hl7_timestamp(
-            datetime.now().astimezone()
-        )
+        msg.msh.date_time_of_message = self._format_to_hl7_timestamp(datetime.now().astimezone())
 
         # MSH-9: Message Type
         msg.msh.message_type = "ORU^R01^ORU_R01"
@@ -367,9 +356,7 @@ class HL7v2Generator:
         msg.msh.character_set = "UNICODE UTF-8"
         msg.msh.principal_language_of_message = "fr^français^ISO6391^FR^France^ISO3166"
         msg.msh.message_profile_identifier = (
-            f"{self.institution.message_profile_name}"
-            f"^{self.institution.message_profile_oid}"
-            f"^1.2.250.1.710.1.2.1^ISO"
+            f"{self.institution.message_profile_name}^{self.institution.message_profile_oid}^1.2.250.1.710.1.2.1^ISO"
         )
 
     def _populate_pid(self, patient_result, patient: PatientData, report_id: str) -> None:
@@ -404,9 +391,7 @@ class HL7v2Generator:
             f"&{self.institution.lab_finess}&{OID_GIPCPS_TYPE_IDENTIFIANT_STRUCTURE}^PI"
         )
         # PID.5 - Patient Name
-        patient_group.pid.patient_name = (
-            f"{patient.patient_family_name}^{patient.patient_given_name}^^^^^L"
-        )
+        patient_group.pid.patient_name = f"{patient.patient_family_name}^{patient.patient_given_name}^^^^^L"
         # PID-7: Date/Time of Birth
         patient_group.pid.date_time_of_birth = patient.hl7_birth_date
         # PID-8: Administrative Sex
@@ -447,10 +432,7 @@ class HL7v2Generator:
         con.con_1 = "1"
 
         # CON.2 - Consent Type (O) - CWE
-        con.con_2 = (
-            "1^Release of Information / MR / "
-            "Authorization to Disclosure Protected Health Information"
-        )
+        con.con_2 = "1^Release of Information / MR / Authorization to Disclosure Protected Health Information"
 
         # CON.3 - Consent Form ID (O)
         con.con_3 = "*"
@@ -485,16 +467,12 @@ class HL7v2Generator:
 
         # CON.24 - Consenter ID (R) - XPN datatype
         # Format: family_name^given_name^^^^^L
-        con.con_24 = (
-            f"{consent.consenter_family_name}^{consent.consenter_given_name}^^^^^L"
-        )
+        con.con_24 = f"{consent.consenter_family_name}^{consent.consenter_given_name}^^^^^L"
 
         # CON.25 - Relationship to Subject (R) - 7 = Self
         con.con_25 = "7"
 
-    def _populate_nk1(
-        self, patient_result, next_of_kin_list: List[RelatedPersonData]
-    ) -> None:
+    def _populate_nk1(self, patient_result, next_of_kin_list: List[RelatedPersonData]) -> None:
         """Populate NK1 segments for father/mother in the main_patient's PATIENT_RESULT group.
 
         NK1 segments come after PID/CON in the patient group hierarchy.
@@ -535,9 +513,7 @@ class HL7v2Generator:
             if nok.birth_date:
                 nk1.nk1_16 = nok.hl7_birth_date
 
-    def _populate_pid_for_nok(
-        self, patient_result, nok: RelatedPersonData, report_id: str
-    ) -> None:
+    def _populate_pid_for_nok(self, patient_result, nok: RelatedPersonData, report_id: str) -> None:
         """Populate PID segment for a NOK individual (father/mother).
 
         :param patient_result: PATIENT_RESULT group to populate
@@ -557,9 +533,7 @@ class HL7v2Generator:
             )
 
         if nok.family_name and nok.given_name:
-            patient_group.pid.patient_name = (
-                f"{nok.family_name}^{nok.given_name}^^^^^L"
-            )
+            patient_group.pid.patient_name = f"{nok.family_name}^{nok.given_name}^^^^^L"
 
         patient_group.pid.date_time_of_birth = nok.hl7_birth_date
 
@@ -602,10 +576,7 @@ class HL7v2Generator:
         if main_patient.patient_family_name and main_patient.patient_given_name:
             nk1.nk1_2 = f"{main_patient.patient_family_name}^{main_patient.patient_given_name}^^^^^L"
         label = role_labels.get(inverse_code, inverse_code.lower())
-        nk1.nk1_3 = (
-            f"{inverse_code}^{label}^{_V3_ROLE_CODE_SYSTEM}"
-            f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
-        )
+        nk1.nk1_3 = f"{inverse_code}^{label}^{_V3_ROLE_CODE_SYSTEM}^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
         if main_patient.sex:
             nk1.nk1_15 = main_patient.sex
         if main_patient.birth_date:
@@ -741,21 +712,15 @@ class HL7v2Generator:
                 if data_ref in files_set:
                     continue  # will be emitted together with the data file
                 sidecar_ref = file_ref
-                hash_b64 = self._read_sha256_b64_from_sidecar(
-                    os.path.join(directory_path, file_ref)
-                )
+                hash_b64 = self._read_sha256_b64_from_sidecar(os.path.join(directory_path, file_ref))
             else:
                 data_ref = file_ref
                 sidecar_ref = file_ref + ".sha256"
                 if sidecar_ref in files_set:
-                    hash_b64 = self._read_sha256_b64_from_sidecar(
-                        os.path.join(directory_path, sidecar_ref)
-                    )
+                    hash_b64 = self._read_sha256_b64_from_sidecar(os.path.join(directory_path, sidecar_ref))
                 else:
                     sidecar_ref = None
-                    hash_b64 = self._compute_sha256_b64(
-                        os.path.join(directory_path, file_ref)
-                    )
+                    hash_b64 = self._compute_sha256_b64(os.path.join(directory_path, file_ref))
 
             data_filename = os.path.basename(data_ref)
             code, description, system = self._get_file_format_info(data_filename)
@@ -825,16 +790,13 @@ class HL7v2Generator:
             # Navigate to correct HL7v2 hierarchy for PRT segment
             order_observation = patient_result.oru_r01_order_observation
             obs_groups = [
-                c for c in order_observation.children
-                if getattr(c, "name", "").upper() == "ORU_R01_OBSERVATION"
+                c for c in order_observation.children if getattr(c, "name", "").upper() == "ORU_R01_OBSERVATION"
             ]
             observation_group = obs_groups[-1] if obs_groups else order_observation.oru_r01_observation
 
             # PRT-1: Participation Instance Id (EI) - Complete format with authority
             if rcp and rcp.rcp_nom and rcp.rcp_id:
-                observation_group.prt.prt_1 = (
-                    f"{rcp.rcp_nom}^{rcp.rcp_id}^1.2.250.1.710.1.2.5.3^ISO"
-                )
+                observation_group.prt.prt_1 = f"{rcp.rcp_nom}^{rcp.rcp_id}^1.2.250.1.710.1.2.5.3^ISO"
 
             # PRT-2: Action Code (ID) - Fixed value from specs
             observation_group.prt.prt_2 = "AD"
@@ -849,19 +811,13 @@ class HL7v2Generator:
             if person:
                 person_entries = []
                 if person.prescripteur:
-                    person_entries.append(
-                        f"{person.prescripteur}^^^^^^MD^1.2.250.1.710.1.5.1"
-                    )
+                    person_entries.append(f"{person.prescripteur}^^^^^^MD^1.2.250.1.710.1.5.1")
                 if person.membre_rcp:
-                    person_entries.append(
-                        f"{person.membre_rcp}^^^^^^MD^1.2.250.1.710.1.5.1"
-                    )
+                    person_entries.append(f"{person.membre_rcp}^^^^^^MD^1.2.250.1.710.1.5.1")
 
                 # Add each person entry as a separate PRT-5 repetition
                 for xcn_value in person_entries:
-                    prt_5_field = observation_group.prt.add_field(
-                        "PRT_5"
-                    )  # Add repetition
+                    prt_5_field = observation_group.prt.add_field("PRT_5")  # Add repetition
                     prt_5_field.value = xcn_value  # Set ER7 value
 
             # PRT-6: Person Provider Type (CWE) - Empty per specs
@@ -891,12 +847,7 @@ class HL7v2Generator:
                 observation_group.prt.prt_12.value = timing.end.strftime("%Y%m%d%H%M")
 
         except Exception as e:
-            # If adding PRT fails, print debug info and continue
-            print(f"DEBUG: Failed to add PRT segment with hl7apy: {e}")
-            print(
-                f"DEBUG: Available segments in message: {[s.name for s in msg.children]}"
-            )
-            raise
+            raise RuntimeError(f"Failed to add PRT segment: {e}") from e
 
     def _compute_sha256_b64(self, filepath: str) -> str:
         """Compute SHA-256 of a file and return its hex digest Base64-encoded.
@@ -940,9 +891,7 @@ class HL7v2Generator:
             # Get single extension
             parts = filename.lower().split(".")
             if len(parts) < 2:
-                raise ValueError(
-                    f"Unsupported file extension: {filename} (no extension)"
-                )
+                raise ValueError(f"Unsupported file extension: {filename} (no extension)")
             extension = parts[-1]
 
         # Look up format info
@@ -955,9 +904,9 @@ class HL7v2Generator:
     def generate_and_seal(
         self,
         parsed_report_data: CompositionData,
-        directory: "Path",
+        directory: Path,
         name: str,
-    ) -> "Path":
+    ) -> Path:
         """Generate an HL7v2 message, write it to disk, and "seal" it
         with a .hl7.sha256 checksum file.
 
@@ -970,9 +919,7 @@ class HL7v2Generator:
         :return: Path to the written .hl7 file
         :rtype: Path
         """
-        from pathlib import Path as _Path
-
-        directory = _Path(directory)
+        directory = Path(directory)
         hl7_message = self.generate(parsed_report_data, files_directory=str(directory))
 
         hl7_file = directory / f"{name}.hl7"

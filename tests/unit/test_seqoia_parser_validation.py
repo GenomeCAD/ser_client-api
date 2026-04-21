@@ -85,7 +85,6 @@ class TestParserValidation:
 
 
 class TestSchemaCaching:
-
     def test_schema_loaded_after_first_parse(self, minimal_prescription_json):
         assert SeqoiaParser._schema is None
         SeqoiaParser().parse(minimal_prescription_json)
@@ -129,21 +128,25 @@ class TestTrioParsing:
 
     def test_folder_name_falls_back_to_family_given_when_no_id_anon(self):
         from ser_client_api.hl7v2.domain_models import RelatedPersonData
+
         nok = RelatedPersonData(set_id=1, relationship_code="FTH", family_name="DUPONT", given_name="JEAN")
         assert nok.folder_name == "DUPONT_JEAN"
 
     def test_folder_name_returns_none_when_no_id_anon_and_no_names(self):
         from ser_client_api.hl7v2.domain_models import RelatedPersonData
+
         nok = RelatedPersonData(set_id=1, relationship_code="FTH")
         assert nok.folder_name is None
 
 
 class TestRealExamples:
-
-    @pytest.mark.parametrize("filename", [
-        "6d91642f-40ee-4f8e-afc3-3526101ad1e4.json",
-        "ceb02985-8da5-4b7e-87b3-bb55d3d374a8.json",
-    ])
+    @pytest.mark.parametrize(
+        "filename",
+        [
+            "6d91642f-40ee-4f8e-afc3-3526101ad1e4.json",
+            "ceb02985-8da5-4b7e-87b3-bb55d3d374a8.json",
+        ],
+    )
     def test_bundled_real_prescription_parses_successfully(self, filename):
         examples = importlib.resources.files("ser_client_api.hl7v2.seqoia") / "examples"
         data = json.loads((examples / filename).read_text(encoding="utf-8"))

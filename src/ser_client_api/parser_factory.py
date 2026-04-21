@@ -17,7 +17,5 @@ class ParserFactory:
         module_path = self._institution.local_data_parser
         module = importlib.import_module(module_path)
         if not hasattr(module, "get_parser"):
-            raise AttributeError(
-                f"Module '{module_path}' must expose a get_parser() function"
-            )
+            raise AttributeError(f"Module '{module_path}' must expose a get_parser() function")
         return module.get_parser()

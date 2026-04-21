@@ -7,7 +7,6 @@ from ser_client_api.vocabularies.seqoia import FILIERE, translate_filiere
 
 
 class TestV3Display:
-
     def test_known_code_returns_display(self):
         assert v3_display("FTH") == "father"
 
@@ -16,13 +15,11 @@ class TestV3Display:
 
 
 class TestPfmgDisplay:
-
     def test_known_code_returns_french_label(self):
         assert pfmg_display("F-01") == "Cardiomyopathies familiales [CARDIOGEN]"
 
 
 class TestTranslateFiliere:
-
     def test_multi_target_key_returns_first_target(self):
         # p1-sp11 maps to F-51, F-52, F-59 — first wins
         code, display = translate_filiere("p1-sp11")
