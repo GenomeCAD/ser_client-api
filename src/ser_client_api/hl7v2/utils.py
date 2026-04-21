@@ -5,7 +5,6 @@ HL7v2 utility functions
 import hashlib
 from pathlib import Path
 
-
 _SKIP_EXTENSIONS = {".sha256", ".hl7", ".hl7.sha256", ".hl7.ok", ".hl7.ack"}
 
 

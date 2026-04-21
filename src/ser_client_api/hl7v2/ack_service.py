@@ -2,10 +2,10 @@ import logging
 from dataclasses import dataclass
 from typing import List, Tuple
 
-from hl7apy.exceptions import HL7apyException
-from hl7apy.parser import parse_message
 from hl7apy import load_message_profile
 from hl7apy.consts import VALIDATION_LEVEL
+from hl7apy.exceptions import HL7apyException
+from hl7apy.parser import parse_message
 
 logger = logging.getLogger(__name__)
 
@@ -60,23 +60,23 @@ def parse_hl7_message_robust(ack_content: str, profile_path: str):
 
     logger.debug(f"Original content length: {len(ack_content)}")
     logger.debug(f"Normalized content length: {len(normalized_content)}")
-    logger.debug(
-        f"Original line endings: \\r={ack_content.count(cr_char)}, \\n={ack_content.count(lf_char)}"
-    )
+    logger.debug(f"Original line endings: \\r={ack_content.count(cr_char)}, \\n={ack_content.count(lf_char)}")
     logger.debug(
         f"Normalized line endings: \\r={normalized_content.count(cr_char)}, \\n={normalized_content.count(lf_char)}"
     )
 
     message_profile = load_message_profile(profile_path)
-    return parse_message(normalized_content, message_profile=message_profile, validation_level=VALIDATION_LEVEL.STRICT)
+    return parse_message(
+        normalized_content,
+        message_profile=message_profile,
+        validation_level=VALIDATION_LEVEL.STRICT,
+    )
 
 
 def _extract_msa_info(ack_msg) -> Tuple[str, str]:
     """Extract MSA status and message control ID from HL7 message"""
     msa_status = ack_msg.msa.msa_1.value.strip()
-    message_control_id = (
-        ack_msg.msa.msa_2.value.strip() if ack_msg.msa.msa_2 else "unknown"
-    )
+    message_control_id = ack_msg.msa.msa_2.value.strip() if ack_msg.msa.msa_2 else "unknown"
     return msa_status, message_control_id
 
 
@@ -92,21 +92,9 @@ def _analyze_error_segments(ack_msg) -> Tuple[List[str], List[str], List[str]]:
         # err_8 = Diagnostic Information (human-readable message)
         # err_3 = Error Location (file path/reference)
 
-        severity_level = (
-            hl7_error_segment.err_4.value.strip()
-            if hl7_error_segment.err_4
-            else "Unknown"
-        )
-        diagnostic_message = (
-            hl7_error_segment.err_8.value.strip()
-            if hl7_error_segment.err_8
-            else "No description"
-        )
-        affected_file_path = (
-            hl7_error_segment.err_3.value.strip()
-            if hl7_error_segment.err_3
-            else "Unknown file"
-        )
+        severity_level = hl7_error_segment.err_4.value.strip() if hl7_error_segment.err_4 else "Unknown"
+        diagnostic_message = hl7_error_segment.err_8.value.strip() if hl7_error_segment.err_8 else "No description"
+        affected_file_path = hl7_error_segment.err_3.value.strip() if hl7_error_segment.err_3 else "Unknown file"
 
         formatted_diagnostic = f"File {affected_file_path}: {diagnostic_message}"
 
@@ -137,22 +125,19 @@ def determine_transfer_status(analysis: AckAnalysisResult) -> int:
         return 2
 
 
-def _log_ack_results(
-    filename: str, analysis: AckAnalysisResult, transfer_status: int
-) -> None:
+def _log_ack_results(filename: str, analysis: AckAnalysisResult, transfer_status: int) -> None:
     """Log ACK processing results - simplified"""
     # Base context
-    context = f"ACK File: {filename} | Control ID:" f" {analysis.message_control_id}"
+    context = f"ACK File: {filename} | Control ID: {analysis.message_control_id}"
 
     # Main result (one line)
+    counts = (
+        f"Errors: {len(analysis.critical_errors)}, Warnings: {len(analysis.warnings)}, Infos: {len(analysis.infos)}"
+    )
     if transfer_status == 0:
-        logger.info(
-            f"{context} | SUCCESS ({analysis.msa_status}) | Errors: {len(analysis.critical_errors)}, Warnings: {len(analysis.warnings)}, Infos: {len(analysis.infos)}"
-        )
+        logger.info(f"{context} | SUCCESS ({analysis.msa_status}) | {counts}")
     else:
-        logger.error(
-            f"{context} | FAILED ({analysis.msa_status}) | Errors: {len(analysis.critical_errors)}, Warnings: {len(analysis.warnings)}, Infos: {len(analysis.infos)}"
-        )
+        logger.error(f"{context} | FAILED ({analysis.msa_status}) | {counts}")
 
     # Details (if any)
     for error in analysis.critical_errors:
@@ -166,9 +151,7 @@ def _log_ack_results(
 def analyze_ack_message(ack_msg) -> AckAnalysisResult:
     """Analyze complete ACK message and return structured result"""
     msa_status, message_control_id = _extract_msa_info(ack_msg)
-    critical_error_messages, warning_messages, info_messages = _analyze_error_segments(
-        ack_msg
-    )
+    critical_error_messages, warning_messages, info_messages = _analyze_error_segments(ack_msg)
 
     return AckAnalysisResult(
         msa_status=msa_status,

@@ -5,12 +5,16 @@ from pathlib import Path
 
 import pytest
 
-from ser_client_api.vocabularies.seqoia import translate_relationship, translate_relationship_by_regex
 from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser
+from ser_client_api.vocabularies.seqoia import (
+    translate_relationship,
+    translate_relationship_by_regex,
+)
 
 _REGEX_EXAMPLES = json.loads(
     (Path(__file__).parent.parent / "fixtures" / "relationship_regex_examples.json").read_text(encoding="utf-8")
 )
+
 
 class TestTranslateRelationship:
     def test_known_lowercase_entry(self):
@@ -41,9 +45,12 @@ def _make_prescription(lien_key, lien_name):
     return {
         "_id": "test-id",
         "preindication": {
-            "catname": "Cat", "catkey": "p1",
-            "name": "Test", "key": "p1-sp60",
-            "rcp_id": "rcp1", "rcp_nom": "RCP",
+            "catname": "Cat",
+            "catkey": "p1",
+            "name": "Test",
+            "key": "p1-sp60",
+            "rcp_id": "rcp1",
+            "rcp_nom": "RCP",
         },
         "patients": [
             {
@@ -109,6 +116,7 @@ class TestTranslateRelationshipByRegex:
         """Two kinship words chained by de/du with no explicit pattern -> None (-> EXT)."""
         assert translate_relationship_by_regex("frère de l'oncle de Paul") is None
 
+
 class TestParserAutreLogic:
     def test_autre_with_matched_libelle_uses_table_code(self):
         """When lien.key='autre' and lien.name matches the table, use the table code."""
@@ -158,4 +166,3 @@ class TestParserAutreLogic:
         result = SeqoiaParser().parse(minimal_prescription_json)
         set_ids = [nok.set_id for nok in result.next_of_kin]
         assert set_ids == [1, 2]
-

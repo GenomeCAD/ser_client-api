@@ -29,10 +29,7 @@ _concept_map: Optional[dict] = None
 def _get_concept_map() -> dict:
     global _concept_map
     if _concept_map is None:
-        map_file = (
-            importlib.resources.files("ser_client_api.vocabularies.seqoia")
-            / "seqoia-to-pfmg-filiere.json"
-        )
+        map_file = importlib.resources.files("ser_client_api.vocabularies.seqoia") / "seqoia-to-pfmg-filiere.json"
         _concept_map = json.loads(map_file.read_text(encoding="utf-8"))
     return _concept_map
 
@@ -70,10 +67,7 @@ _relationship_index: Optional[dict[str, str]] = None
 def _get_relationship_index() -> dict[str, str]:
     global _relationship_index
     if _relationship_index is None:
-        f = (
-            importlib.resources.files("ser_client_api.vocabularies.seqoia")
-            / "seqoia-to-v3-relationship.json"
-        )
+        f = importlib.resources.files("ser_client_api.vocabularies.seqoia") / "seqoia-to-v3-relationship.json"
         data = json.loads(f.read_text(encoding="utf-8"))
         index: dict[str, str] = {}
         for group in data.get("group", []):
@@ -103,10 +97,7 @@ _pattern_rules: Optional[list] = None
 def _get_pattern_rules() -> list:
     global _pattern_rules
     if _pattern_rules is None:
-        f = (
-            importlib.resources.files("ser_client_api.vocabularies.seqoia")
-            / "seqoia-relationship-patterns.json"
-        )
+        f = importlib.resources.files("ser_client_api.vocabularies.seqoia") / "seqoia-relationship-patterns.json"
         data = json.loads(f.read_text(encoding="utf-8"))
         _pattern_rules = [(re.compile(row["pattern"]), row["code"]) for row in data]
     return _pattern_rules

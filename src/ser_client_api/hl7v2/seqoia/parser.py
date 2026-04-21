@@ -21,7 +21,11 @@ from ser_client_api.hl7v2.domain_models import (
     ProcedureData,
     RelatedPersonData,
 )
-from ser_client_api.vocabularies.seqoia import translate_filiere, translate_relationship, translate_relationship_by_regex
+from ser_client_api.vocabularies.seqoia import (
+    translate_filiere,
+    translate_relationship,
+    translate_relationship_by_regex,
+)
 
 
 def _get_required_field(data: Dict[str, Any], field: str) -> Any:
@@ -262,18 +266,20 @@ class SeqoiaParser:
 
             id_anon = _get_optional_field(patient_entry, "id_anon")
 
-            next_of_kin_list.append(RelatedPersonData(
-                set_id=set_id,
-                relationship_code=rel_code,
-                relationship_display=rel_display,
-                relationship_is_exact=is_exact,
-                family_name=_get_optional_field(patient_info, "nom"),
-                given_name=_get_optional_field(patient_info, "prenom"),
-                birth_date=birth_date,
-                sex=_get_optional_field(patient_info, "sexe"),
-                patient_id=patient_id,
-                id_anon=id_anon,
-            ))
+            next_of_kin_list.append(
+                RelatedPersonData(
+                    set_id=set_id,
+                    relationship_code=rel_code,
+                    relationship_display=rel_display,
+                    relationship_is_exact=is_exact,
+                    family_name=_get_optional_field(patient_info, "nom"),
+                    given_name=_get_optional_field(patient_info, "prenom"),
+                    birth_date=birth_date,
+                    sex=_get_optional_field(patient_info, "sexe"),
+                    patient_id=patient_id,
+                    id_anon=id_anon,
+                )
+            )
 
         return next_of_kin_list if next_of_kin_list else None
 

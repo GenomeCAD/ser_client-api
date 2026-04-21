@@ -12,11 +12,9 @@ NK1-3 is encoded as CWE with 6 components:
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from ser_client_api.hl7v2.generator import (
-    _V3_ROLE_CODE_SYSTEM,
     _MATCH_CONFIDENCE_SYSTEM,
+    _V3_ROLE_CODE_SYSTEM,
     _resolve_inverse_code,
 )
 
@@ -100,10 +98,7 @@ class TestNK1Relationship:
         nk1s = _nk1_fields(hl7)
 
         father_nk1 = next(n for n in nk1s if n["pid_set_id"] == "1" and "FTH" in n["nk1_3"])
-        expected = (
-            f"FTH^père^{_V3_ROLE_CODE_SYSTEM}"
-            f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
-        )
+        expected = f"FTH^père^{_V3_ROLE_CODE_SYSTEM}^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
         assert father_nk1["nk1_3"] == expected
 
     def test_main_patient_nk1_mother_cwe(self, generator, composition):
@@ -111,10 +106,7 @@ class TestNK1Relationship:
         nk1s = _nk1_fields(hl7)
 
         mother_nk1 = next(n for n in nk1s if n["pid_set_id"] == "1" and "MTH" in n["nk1_3"])
-        expected = (
-            f"MTH^mère^{_V3_ROLE_CODE_SYSTEM}"
-            f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
-        )
+        expected = f"MTH^mère^{_V3_ROLE_CODE_SYSTEM}^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
         assert mother_nk1["nk1_3"] == expected
 
     def test_nok_group_child_code(self, generator, composition):
@@ -124,10 +116,7 @@ class TestNK1Relationship:
         child_nk1s = [n for n in nk1s if "CHILD" in n["nk1_3"]]
         assert len(child_nk1s) >= 1, "Expected at least one CHILD NK1-3 in NOK groups"
         for n in child_nk1s:
-            expected = (
-                f"CHILD^enfant^{_V3_ROLE_CODE_SYSTEM}"
-                f"^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
-            )
+            expected = f"CHILD^enfant^{_V3_ROLE_CODE_SYSTEM}^1.0^match-confidence^{_MATCH_CONFIDENCE_SYSTEM}"
             assert n["nk1_3"] == expected
 
     def test_nok_group_no_sps_segment(self, generator, composition):
@@ -137,13 +126,18 @@ class TestNK1Relationship:
 
     def test_non_exact_nok_has_no_inverse_nk1(self, generator, composition):
         import tempfile
+
         from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser
+
         prescription = {
             "_id": "test-non-exact",
             "preindication": {
-                "catname": "Cat", "catkey": "p1",
-                "name": "Test", "key": "p1-sp60",
-                "rcp_id": "rcp1", "rcp_nom": "RCP",
+                "catname": "Cat",
+                "catkey": "p1",
+                "name": "Test",
+                "key": "p1-sp60",
+                "rcp_id": "rcp1",
+                "rcp_nom": "RCP",
             },
             "patients": [
                 {
@@ -151,7 +145,9 @@ class TestNK1Relationship:
                         "id": {"type": "IPP", "value": "IPP-001"},
                         "date_naissance": "1990-01-01",
                         "sexe": "M",
-                        "nom": "DUPONT", "nom_naissance": "DUPONT", "prenom": "PAUL",
+                        "nom": "DUPONT",
+                        "nom_naissance": "DUPONT",
+                        "prenom": "PAUL",
                     },
                     "lien": {"key": "patient", "name": "Patient"},
                     "is_data_reusable_for_research": False,
@@ -163,7 +159,9 @@ class TestNK1Relationship:
                         "id": {"type": "IPP", "value": "IPP-002"},
                         "date_naissance": "1988-05-10",
                         "sexe": "M",
-                        "nom": "DUPONT", "nom_naissance": "DUPONT", "prenom": "NICOLAS",
+                        "nom": "DUPONT",
+                        "nom_naissance": "DUPONT",
+                        "prenom": "NICOLAS",
                     },
                     "lien": {"key": "autre", "name": "frère de Paul"},  # Level 2 regex
                     "is_data_reusable_for_research": False,
@@ -171,7 +169,8 @@ class TestNK1Relationship:
                     "id_anon": "NOK1",
                 },
             ],
-            "prescripteur": "123", "membreRCP": "456",
+            "prescripteur": "123",
+            "membreRCP": "456",
             "analysis_info": {"analysis_ID": "9999", "date_fin_analyse": "01042026"},
             "date_creation": 1741606397865,
             "date_cloture": 1745498322775,
@@ -187,7 +186,4 @@ class TestNK1Relationship:
 
         nk1s = _nk1_fields(hl7)
         nok_nk1s = [n for n in nk1s if n["pid_set_id"] == "2"]
-        assert nok_nk1s == [], (
-            "Non-exact NOK should produce no inverse NK1, "
-            f"but got: {nok_nk1s}"
-        )
+        assert nok_nk1s == [], f"Non-exact NOK should produce no inverse NK1, but got: {nok_nk1s}"

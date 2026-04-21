@@ -7,8 +7,11 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
+from ser_client_api.hl7v2.ack_service import (
+    analyze_ack_message,
+    determine_transfer_status,
+)
 from ser_client_api.hl7v2.domain_models import CompositionData
-from ser_client_api.hl7v2.ack_service import AckAnalysisResult, analyze_ack_message, determine_transfer_status
 from ser_client_api.hl7v2.institution_config import InstitutionConfig
 from ser_client_api.parser_factory import ParserFactory
 
@@ -72,7 +75,9 @@ def print_composition(composition: CompositionData) -> None:
     print(f"Consent      : reusable={composition.consent.is_data_reusable_for_research}")
     if composition.next_of_kin:
         for nok in composition.next_of_kin:
-            print(f"Next of kin  : [{nok.relationship_code}] {nok.family_name} {nok.given_name} (DOB: {nok.birth_date})")
+            print(
+                f"Next of kin  : [{nok.relationship_code}] {nok.family_name} {nok.given_name} (DOB: {nok.birth_date})"
+            )
 
 
 def print_transfer_directory(presc_dir: Path) -> None:

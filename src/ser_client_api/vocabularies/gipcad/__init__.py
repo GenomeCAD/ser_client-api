@@ -22,10 +22,7 @@ def _load_expansion(filename: str) -> dict[str, str]:
     """Return {code: display} from a ValueSet JSON expansion."""
     f = importlib.resources.files("ser_client_api.vocabularies.gipcad") / filename
     data = json.loads(f.read_text(encoding="utf-8"))
-    return {
-        entry["code"]: entry["display"]
-        for entry in data.get("expansion", {}).get("contains", [])
-    }
+    return {entry["code"]: entry["display"] for entry in data.get("expansion", {}).get("contains", [])}
 
 
 def v3_display(code: str) -> Optional[str]:
