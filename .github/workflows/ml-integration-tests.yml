@@ -1,0 +1,39 @@
+name: Run ML Integration Tests
+
+on:
+  pull_request:
+    paths:
+      - 'src/ser_client_api/ml/**'
+      - 'tests/integration/**'
+      - 'pyproject.toml'
+  workflow_dispatch:
+
+jobs:
+  ml-integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache HuggingFace models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: huggingface-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            huggingface-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[ml]"
+
+      - name: Run ML integration tests
+        run: |
+          pytest tests/integration -v

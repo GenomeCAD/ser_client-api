@@ -32,12 +32,13 @@ try:
     import numpy  # noqa: F401
     import sentence_transformers  # noqa: F401
 
-    from ser_client_api.vocabularies.seqoia.similarity import (
+    from ser_client_api.ml.seqoia.similarity import (
         translate_relationship_by_similarity as _translate_by_similarity,
     )
 
     _SIMILARITY_AVAILABLE = True
 except ImportError:
+    _translate_by_similarity = None
     _SIMILARITY_AVAILABLE = False
 
 

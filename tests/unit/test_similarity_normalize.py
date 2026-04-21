@@ -1,6 +1,6 @@
 """Unit tests for similarity.normalize() and remove_entities() - no ML deps required."""
 
-from ser_client_api.vocabularies.seqoia.similarity import normalize, remove_entities
+from ser_client_api.ml.seqoia.similarity import normalize, remove_entities
 
 
 class TestNormalize:

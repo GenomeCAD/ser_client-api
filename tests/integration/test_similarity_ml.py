@@ -16,7 +16,7 @@ sentence_transformers = pytest.importorskip(
 numpy = pytest.importorskip("numpy", reason="numpy not installed - skipping ML integration tests")
 
 from ser_client_api.hl7v2.seqoia.parser import SeqoiaParser  # noqa: E402
-from ser_client_api.vocabularies.seqoia.similarity import (  # noqa: E402
+from ser_client_api.ml.seqoia.similarity import (  # noqa: E402
     _get_ref_index,
     normalize,
     remove_entities,
@@ -187,7 +187,7 @@ class TestTranslateRelationshipBySimilarity:
 
 class TestPIIRemovalPipeline:
     def test_name_is_stripped_from_normalised_text(self):
-        from ser_client_api.vocabularies.seqoia.similarity import _GLINER_LABELS, _get_gliner_model
+        from ser_client_api.ml.seqoia.similarity import _GLINER_LABELS, _get_gliner_model
 
         model = _get_gliner_model()
         text = normalize("frère de Jean-Pierre Dupont")
@@ -197,7 +197,7 @@ class TestPIIRemovalPipeline:
         assert "dupont" not in result or "jean" not in result
 
     def test_kinship_token_germain_preserved(self):
-        from ser_client_api.vocabularies.seqoia.similarity import _GLINER_LABELS, _get_gliner_model
+        from ser_client_api.ml.seqoia.similarity import _GLINER_LABELS, _get_gliner_model
 
         model = _get_gliner_model()
         text = normalize("cousin germain")
