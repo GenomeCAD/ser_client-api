@@ -2,37 +2,37 @@
   {
     "libelle": "frère de la mère de ${Prénom}",
     "code": "MUNCLE",
-    "pattern": "(?i)fr[eè]re de la m[eè]re de (.+)"
+    "pattern": "(?i)fr[eè]re de la m[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "sœur de la mère de ${Prénom}",
     "code": "MAUNT",
-    "pattern": "(?i)s(?:oe|\\u0153)ur de la m[eè]re de (.+)"
+    "pattern": "(?i)s(?:oe|\\u0153)ur de la m[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "sœur du père de ${Prénom}",
     "code": "PAUNT",
-    "pattern": "(?i)s(?:oe|\\u0153)ur du p[eè]re de (.+)"
+    "pattern": "(?i)s(?:oe|\\u0153)ur du p[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "fils du frère de ${Prénom}",
     "code": "NEPHEW",
-    "pattern": "(?i)fils du fr[eè]re de (.+)"
+    "pattern": "(?i)fils du fr[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "fils de la sœur de ${Prénom}",
     "code": "NEPHEW",
-    "pattern": "(?i)fils de la s(?:oe|\\u0153)ur de (.+)"
+    "pattern": "(?i)fils de la s(?:oe|\\u0153)ur d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "fille du frère de ${Prénom}",
     "code": "NIECE",
-    "pattern": "(?i)fille du fr[eè]re de (.+)"
+    "pattern": "(?i)fille du fr[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "fille de la sœur de ${Prénom}",
     "code": "NIECE",
-    "pattern": "(?i)fille de la s(?:oe|\\u0153)ur de (.+)"
+    "pattern": "(?i)fille de la s(?:oe|\\u0153)ur d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "cousine paternelle du père de ${Civilité} ${Nom} ${Prénom}",
@@ -47,12 +47,12 @@
   {
     "libelle": "cousin de la mère de ${Prénom}",
     "code": "MCOUSN",
-    "pattern": "(?i)cousin de la m[eè]re de (.+)"
+    "pattern": "(?i)cousin de la m[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "cousine de la mère de ${Prénom}",
     "code": "MCOUSN",
-    "pattern": "(?i)cousine de la m[eè]re de (.+)"
+    "pattern": "(?i)cousine de la m[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "COUSIN MATERNEL / FILS DE ${Civilité} ${Nom} ${Prénom}",
@@ -62,7 +62,7 @@
   {
     "libelle": "frère du père de ${Prénom}",
     "code": "PUNCLE",
-    "pattern": "(?i)fr[eè]re du p[eè]re de (.+)"
+    "pattern": "(?i)fr[eè]re du p[eè]re d(?:e |['\u2019])(.+)"
   },
   {
     "libelle": "Frère du père ${Prénom}",
@@ -96,17 +96,17 @@
   },
   {
     "libelle": "Epouse du cas index, mère de ${Prénom}",
-    "code": "MTH",
+    "code": "WIFE",
     "pattern": "(?i)epouse du cas index.*m[eè]re de (.+)"
   },
   {
     "libelle": "Epouse de ${Prénom}, mère de ${Prénom}",
-    "code": "MTH",
+    "code": "WIFE",
     "pattern": "(?i)epouse de (.+),.*m[eè]re de (.+)"
   },
   {
     "libelle": "Epouse (mère de ${Prénom})",
-    "code": "MTH",
+    "code": "WIFE",
     "pattern": "(?i)epouse.*m[eè]re de (.+)"
   },
   {
@@ -116,7 +116,7 @@
   },
   {
     "libelle": "Frère de ${Prénom}, Fils de ${Civilité} ${Nom}",
-    "code": "SON",
+    "code": "BRO",
     "pattern": "(?i)fr[eè]re de (.+),.*fils de (.+) (.+)"
   },
   {
