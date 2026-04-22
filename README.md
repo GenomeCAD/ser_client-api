@@ -167,3 +167,7 @@ To run manually:
 ruff check .
 ruff format .
 ```
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
