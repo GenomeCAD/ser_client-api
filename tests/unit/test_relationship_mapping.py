@@ -1,7 +1,8 @@
-"""Unit tests for SeqOIA pedigree relationship mapping (issue #33)."""
+"""Unit tests for SeqOIA pedigree relationship mapping."""
 
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -166,3 +167,90 @@ class TestParserAutreLogic:
         result = SeqoiaParser().parse(minimal_prescription_json)
         set_ids = [nok.set_id for nok in result.next_of_kin]
         assert set_ids == [1, 2]
+
+
+# A libellé that fails Level 1 (not in ConceptMap) and Level 2 (no regex match) — triggers Level 3
+_L3_LIBELLE = "lien familial non précisé par Jean-Pierre Moreau"
+
+
+class TestParserLevel3Similarity:
+    """Parser integration with Level 3 ML similarity — no ML deps, using mocks."""
+
+    def test_level3_fires_when_levels_1_and_2_fail(self):
+        """When Level 1 and Level 2 both fail, Level 3 is invoked and its code is used."""
+        data = _make_prescription("autre", _L3_LIBELLE)
+        with (
+            patch("ser_client_api.hl7v2.seqoia.parser._SIMILARITY_AVAILABLE", True),
+            patch("ser_client_api.hl7v2.seqoia.parser._translate_by_similarity", return_value="COUSN") as mock_sim,
+        ):
+            result = SeqoiaParser().parse(data)
+            nok = result.next_of_kin[0]
+
+        mock_sim.assert_called_once_with(_L3_LIBELLE)
+        assert nok.relationship_code == "COUSN"
+        assert nok.relationship_is_exact is False
+
+    def test_level3_none_falls_back_to_ext(self):
+        """When Level 3 returns None (below threshold), code falls back to EXT."""
+        data = _make_prescription("autre", _L3_LIBELLE)
+        with (
+            patch("ser_client_api.hl7v2.seqoia.parser._SIMILARITY_AVAILABLE", True),
+            patch("ser_client_api.hl7v2.seqoia.parser._translate_by_similarity", return_value=None),
+        ):
+            result = SeqoiaParser().parse(data)
+            nok = result.next_of_kin[0]
+
+        assert nok.relationship_code == "EXT"
+        assert nok.relationship_is_exact is False
+
+    def test_level3_skipped_when_unavailable(self):
+        """When ML deps are absent (_SIMILARITY_AVAILABLE=False), Level 3 is never called."""
+        data = _make_prescription("autre", _L3_LIBELLE)
+        with (
+            patch("ser_client_api.hl7v2.seqoia.parser._SIMILARITY_AVAILABLE", False),
+            patch("ser_client_api.hl7v2.seqoia.parser._translate_by_similarity") as mock_sim,
+        ):
+            result = SeqoiaParser().parse(data)
+            nok = result.next_of_kin[0]
+
+        mock_sim.assert_not_called()
+        assert nok.relationship_code == "EXT"
+
+    def test_level3_preserves_original_display(self):
+        """relationship_display is always the original lien_name, not the ML output."""
+        data = _make_prescription("autre", _L3_LIBELLE)
+        with (
+            patch("ser_client_api.hl7v2.seqoia.parser._SIMILARITY_AVAILABLE", True),
+            patch("ser_client_api.hl7v2.seqoia.parser._translate_by_similarity", return_value="COUSN"),
+        ):
+            result = SeqoiaParser().parse(data)
+            nok = result.next_of_kin[0]
+
+        assert nok.relationship_display == _L3_LIBELLE
+
+    def test_level1_match_skips_level3(self):
+        """When Level 1 matches, Level 3 is never invoked."""
+        data = _make_prescription("autre", "frère")
+        with (
+            patch("ser_client_api.hl7v2.seqoia.parser._SIMILARITY_AVAILABLE", True),
+            patch("ser_client_api.hl7v2.seqoia.parser._translate_by_similarity") as mock_sim,
+        ):
+            result = SeqoiaParser().parse(data)
+            nok = result.next_of_kin[0]
+
+        mock_sim.assert_not_called()
+        assert nok.relationship_code == "BRO"
+        assert nok.relationship_is_exact is True
+
+    def test_level2_match_skips_level3(self):
+        """When Level 2 (regex) matches, Level 3 is never invoked."""
+        data = _make_prescription("autre", "frère de Lucas")
+        with (
+            patch("ser_client_api.hl7v2.seqoia.parser._SIMILARITY_AVAILABLE", True),
+            patch("ser_client_api.hl7v2.seqoia.parser._translate_by_similarity") as mock_sim,
+        ):
+            result = SeqoiaParser().parse(data)
+            nok = result.next_of_kin[0]
+
+        mock_sim.assert_not_called()
+        assert nok.relationship_code == "BRO"

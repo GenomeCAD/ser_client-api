@@ -28,6 +28,11 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov",
 ]
+ml = [
+    "gliner",
+    "sentence-transformers",
+    "numpy",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ser_client_api"]

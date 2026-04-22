@@ -27,6 +27,20 @@ from ser_client_api.vocabularies.seqoia import (
     translate_relationship_by_regex,
 )
 
+try:
+    import gliner  # noqa: F401
+    import numpy  # noqa: F401
+    import sentence_transformers  # noqa: F401
+
+    from ser_client_api.ml.seqoia.similarity import (
+        translate_relationship_by_similarity as _translate_by_similarity,
+    )
+
+    _SIMILARITY_AVAILABLE = True
+except ImportError:
+    _translate_by_similarity = None
+    _SIMILARITY_AVAILABLE = False
+
 
 def _get_required_field(data: Dict[str, Any], field: str) -> Any:
     if field not in data:
@@ -243,6 +257,9 @@ class SeqoiaParser:
                 else:
                     # Level 2: regex inference - relationship is probable but not certain
                     matched = translate_relationship_by_regex(lien_name)
+                    if not matched and _SIMILARITY_AVAILABLE:
+                        # Level 3: PII removal + cosine similarity
+                        matched = _translate_by_similarity(lien_name)
                     is_exact = False
                 rel_code = matched if matched else "EXT"
                 rel_display = lien_name or None
