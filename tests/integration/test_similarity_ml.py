@@ -155,14 +155,14 @@ class TestTranslateRelationshipBySimilarity:
         assert result == "MCOUSN"
 
     def test_grand_oncle_with_pii(self):
-        """'grand-oncle de Jean' - PII removed, grand+oncle compound resolved."""
+        """'grand-oncle de Jean' - PII removed, no direction -> downgraded to generic UNCLE."""
         result = translate_relationship_by_similarity("grand-oncle de Jean")
-        assert result in {"UNCLE", "MUNCLE", "PUNCLE"}
+        assert result == "UNCLE"
 
     def test_cousine_germaine_with_family_name(self):
-        """'cousine germaine de la famille Martin' - 'germaine' blocks L2; ML recovers cousin."""
+        """'cousine germaine de la famille Martin' - no direction -> downgraded to generic COUSN."""
         result = translate_relationship_by_similarity("cousine germaine de la famille Martin")
-        assert result in {"COUSN", "PCOUSN", "MCOUSN"}
+        assert result == "COUSN"
 
     def test_niece_par_alliance_below_threshold(self):
         """'nièce par alliance' - 'alliance' adds enough noise that similarity falls below threshold."""

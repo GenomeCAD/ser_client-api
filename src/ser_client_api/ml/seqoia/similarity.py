@@ -72,6 +72,19 @@ _ref_index: Optional[list] = None
 
 _ACCENT_TABLE = str.maketrans("àâäéèêëîïôöùûüç", "aaaeeeeiioouuuc")
 
+_DIRECTIONAL_TO_GENERIC: dict = {
+    "MUNCLE": "UNCLE",
+    "PUNCLE": "UNCLE",
+    "MCOUSN": "COUSN",
+    "PCOUSN": "COUSN",
+    "MAUNT": "AUNT",
+    "PAUNT": "AUNT",
+    "MGRMTH": "GRMTH",
+    "PGRMTH": "GRMTH",
+    "MGRFTH": "GRFTH",
+    "PGRFTH": "GRFTH",
+}
+
 
 def normalize(text: str) -> str:
     """Normalise a free-text relationship label for embedding comparison."""
@@ -231,6 +244,9 @@ def translate_relationship_by_similarity(
             best_display = row["display"]
 
     if best_score >= threshold:
+        has_direction = "par mere" in ntext or "par pere" in ntext
+        if not has_direction and best_code in _DIRECTIONAL_TO_GENERIC:
+            best_code = _DIRECTIONAL_TO_GENERIC[best_code]
         logger.info(
             "Level 3 match: %r -> %s (%r, score=%.4f)",
             libelle,
