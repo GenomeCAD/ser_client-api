@@ -57,11 +57,11 @@ Replace `SEQOIA` with `AURAGEN` or `PERIGENOMED` for other institutions. See [Su
 from ser_client_api.hl7v2 import SEQOIA, AURAGEN, PERIGENOMED
 ```
 
-| Constant | Facility | Lab FINESS |
-|---|---|---|
-| `SEQOIA` | GCS SeqOIA | 1750063265 |
-| `AURAGEN` | GCS AuraGen — Hospices Civils de Lyon | 1690045059 |
-| `PERIGENOMED` | CHU Dijon Bourgogne | 1210987558 |
+| Constant | Facility | Lab FINESS | Parser |
+|---|---|---|---|
+| `SEQOIA` | GCS SeqOIA | 1750063265 | ✓ implemented |
+| `AURAGEN` | GCS AuraGen - Hospices Civils de Lyon | 1690045059 | not yet implemented |
+| `PERIGENOMED` | CHU Dijon Bourgogne | 1210987558 | not yet implemented |
 
 Each constant is an `InstitutionConfig` instance holding the identifiers that populate HL7v2 message headers and the parser reference used by `ParserFactory`.
 
@@ -117,7 +117,7 @@ The SeqOIA parser resolves free-text relationship labels to HL7v3 RoleCode value
 
 1. **Exact lookup** against the SeqOIA-to-HL7v3 ConceptMap
 2. **Regex matching** against known free-text patterns
-3. **ML similarity** — PII removal followed by cosine similarity against the GIP-CAD pedigree referential (requires `[ml]` extras)
+3. **ML similarity** - PII removal followed by cosine similarity against the GIP-CAD pedigree referential (requires `[ml]` extras)
 
 Levels 1 and 2 cover the vast majority of real-world inputs. Level 3 activates automatically when the first two fail and `[ml]` is installed. Without `[ml]`, unresolved labels fall back to `EXT`.
 
@@ -127,7 +127,7 @@ The `[ml]` extras enable Level 3 pedigree relationship resolution in the SeqOIA 
 
 On first use, two models are downloaded from HuggingFace and cached locally (~600 MB total): `nvidia/gliner-pii` for PII detection and `paraphrase-multilingual-MiniLM-L12-v2` for sentence embeddings. In environments without internet access, pre-populate the HuggingFace cache (`~/.cache/huggingface`) before deployment.
 
-If `[ml]` is not installed, the SeqOIA parser silently falls back to `EXT` for unresolved labels — no exception is raised.
+If `[ml]` is not installed, the SeqOIA parser silently falls back to `EXT` for unresolved labels - no exception is raised.
 
 ## Development
 
@@ -158,7 +158,7 @@ The project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting
 
 ```bash
 pip install pre-commit
-pre-commit install        # installs the hook — runs ruff automatically on each commit
+pre-commit install        # installs the hook - runs ruff automatically on each commit
 ```
 
 To run manually:
@@ -170,4 +170,4 @@ ruff format .
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for details.
