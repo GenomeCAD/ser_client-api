@@ -1,0 +1,146 @@
+name: ser-demo
+
+# Usage:
+#   bash certs/generate-certs.sh        # one-time: generate dev TLS certificates
+#   docker compose build                # build images (tagged below for registry publishing)
+#   docker compose up
+#   -> http://localhost:8888/lab?token=ser-demo  open work/ser_demo_notebook.ipynb
+#
+# The notebook reads FTPS_HOST, FTPS_PORT, FTPS_USER, FTPS_PASSWORD, REMOTE_PATH
+# and CERT_DIR from environment - no manual edits to the notebook are needed.
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Demo client - JupyterLab with ser_client-api + ser_client-ftps pre-installed
+  # ---------------------------------------------------------------------------
+  jupyter:
+    build:
+      context: ../..
+      dockerfile: ser-client-api/docker/jupyter/Dockerfile
+    image: ser-demo-jupyter:0.5.0       # tag allows: docker push ser-demo-jupyter:0.5.0
+    ports:
+      - "8888:8888"
+    environment:
+      JUPYTER_TOKEN: ser-demo           # http://localhost:8888/lab?token=ser-demo
+      FTPS_HOST: proftpd
+      FTPS_PORT: "990"
+      FTPS_USER: CHU-TEST
+      FTPS_PASSWORD: ftppassword
+      REMOTE_PATH: remote/seqoia
+      CERT_DIR: /certs
+    volumes:
+      - ./certs:/certs:ro               # CA + client cert/key, read-only inside container
+      - ../docs:/home/jovyan/work       # notebooks (read-write so outputs can be saved)
+    networks: [ser-net]
+    depends_on:
+      - proftpd
+      - appserver
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # ---------------------------------------------------------------------------
+  # Mock FTPS server (from ser_server-ftps)
+  # ---------------------------------------------------------------------------
+  proftpd:
+    build:
+      context: ../../ser_server-ftps/proftpd-ftps
+    image: ser-demo-proftpd:latest
+    volumes:
+      - ./certs/ca-cert.pem:/etc/proftpd/ssl/cacert.pem:ro
+      - ./certs/server.crt:/etc/proftpd/ssl/proftpd.crt:ro
+      - ./certs/server.key:/etc/proftpd/ssl/proftpd.key:ro
+      - ./proftpd/proftpd.conf:/etc/proftpd/proftpd.conf:ro
+      - ftpdata:/home/CHU-TEST          # shared volume: proftpd writes here, appserver reads
+    ports:
+      - "9990:990"                      # host port offset avoids conflict with ser_server-ftps
+      - "39000-39009:30000-30009"
+    networks: [ser-net]
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  # ---------------------------------------------------------------------------
+  # HL7 consumer + file watcher (from ser_server-ftps)
+  # ---------------------------------------------------------------------------
+  appserver:
+    build:
+      context: ../../ser_server-ftps/appserver
+    image: ser-demo-appserver:latest
+    # /tasks/remote must exist before watchdog starts, and be writable by the CHU-TEST
+    # FTP user (proftpd starts first and chowns /home/CHU-TEST, then appserver creates
+    # the directory as root - chmod 777 bridges the ownership gap).
+    entrypoint: ["/bin/bash", "-c", "mkdir -p /tasks/remote && chmod 777 /tasks/remote && exec /run/entrypoint.sh"]
+    environment:
+      RMQ_HOST: rabbitmq
+      RMQ_USER: user
+      RMQ_PASS: password
+      RMQ_QUEUE: chu_files
+    volumes:
+      - ftpdata:/tasks                  # shared volume: appserver reads uploads, writes ACKs
+    networks: [ser-net]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # Message bus
+  # ---------------------------------------------------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ser-net]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  # ---------------------------------------------------------------------------
+  # audit-db - logs / AuditTrail (a activer selon issue #29)
+  # ---------------------------------------------------------------------------
+  # audit-db:
+  #   image: postgres:17
+  #   environment:
+  #     POSTGRES_USER: audit
+  #     POSTGRES_PASSWORD: password
+  #   volumes:
+  #     - auditdata:/var/lib/postgresql/data
+  #   networks: [ser-net]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 512M
+  #         cpus: '0.5'
+
+volumes:
+  ftpdata:
+  # auditdata:   # decommenter avec audit-db
+
+networks:
+  ser-net:
+    driver: bridge
