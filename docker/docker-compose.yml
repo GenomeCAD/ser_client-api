@@ -11,18 +11,15 @@ name: ser-demo
 
 services:
 
-  # ---------------------------------------------------------------------------
-  # Demo client - JupyterLab with ser_client-api + ser_client-ftps pre-installed
-  # ---------------------------------------------------------------------------
   jupyter:
     build:
       context: ../..
       dockerfile: ser-client-api/docker/jupyter/Dockerfile
-    image: ser-demo-jupyter:0.5.0       # tag allows: docker push ser-demo-jupyter:0.5.0
+    image: ser-demo-jupyter:0.5.0
     ports:
       - "8888:8888"
     environment:
-      JUPYTER_TOKEN: ser-demo           # http://localhost:8888/lab?token=ser-demo
+      JUPYTER_TOKEN: ser-demo
       FTPS_HOST: proftpd
       FTPS_PORT: "990"
       FTPS_USER: CHU-TEST
@@ -30,8 +27,8 @@ services:
       REMOTE_PATH: remote/seqoia
       CERT_DIR: /certs
     volumes:
-      - ./certs:/certs:ro               # CA + client cert/key, read-only inside container
-      - ../docs:/home/jovyan/work       # notebooks (read-write so outputs can be saved)
+      - ./certs:/certs:ro
+      - ../docs:/home/jovyan/work
     networks: [ser-net]
     depends_on:
       - proftpd
@@ -45,9 +42,6 @@ services:
           memory: 256M
           cpus: '0.25'
 
-  # ---------------------------------------------------------------------------
-  # Mock FTPS server (from ser_server-ftps)
-  # ---------------------------------------------------------------------------
   proftpd:
     build:
       context: ../../ser_server-ftps/proftpd-ftps
@@ -57,9 +51,9 @@ services:
       - ./certs/server.crt:/etc/proftpd/ssl/proftpd.crt:ro
       - ./certs/server.key:/etc/proftpd/ssl/proftpd.key:ro
       - ./proftpd/proftpd.conf:/etc/proftpd/proftpd.conf:ro
-      - ftpdata:/home/CHU-TEST          # shared volume: proftpd writes here, appserver reads
+      - ftpdata:/home/CHU-TEST
     ports:
-      - "9990:990"                      # host port offset avoids conflict with ser_server-ftps
+      - "9990:990"
       - "39000-39009:30000-30009"
     networks: [ser-net]
     deploy:
@@ -68,16 +62,10 @@ services:
           memory: 128M
           cpus: '0.25'
 
-  # ---------------------------------------------------------------------------
-  # HL7 consumer + file watcher (from ser_server-ftps)
-  # ---------------------------------------------------------------------------
   appserver:
     build:
       context: ../../ser_server-ftps/appserver
     image: ser-demo-appserver:latest
-    # /tasks/remote must exist before watchdog starts, and be writable by the CHU-TEST
-    # FTP user (proftpd starts first and chowns /home/CHU-TEST, then appserver creates
-    # the directory as root - chmod 777 bridges the ownership gap).
     entrypoint: ["/bin/bash", "-c", "mkdir -p /tasks/remote && chmod 777 /tasks/remote && exec /run/entrypoint.sh"]
     environment:
       RMQ_HOST: rabbitmq
@@ -85,7 +73,7 @@ services:
       RMQ_PASS: password
       RMQ_QUEUE: chu_files
     volumes:
-      - ftpdata:/tasks                  # shared volume: appserver reads uploads, writes ACKs
+      - ftpdata:/tasks
     networks: [ser-net]
     depends_on:
       rabbitmq:
@@ -98,9 +86,6 @@ services:
         reservations:
           memory: 128M
 
-  # ---------------------------------------------------------------------------
-  # Message bus
-  # ---------------------------------------------------------------------------
   rabbitmq:
     image: rabbitmq:3-management
     environment:
@@ -120,9 +105,7 @@ services:
         reservations:
           memory: 256M
 
-  # ---------------------------------------------------------------------------
-  # audit-db - logs / AuditTrail (a activer selon issue #29)
-  # ---------------------------------------------------------------------------
+  # TODO
   # audit-db:
   #   image: postgres:17
   #   environment:
@@ -139,7 +122,7 @@ services:
 
 volumes:
   ftpdata:
-  # auditdata:   # decommenter avec audit-db
+  # auditdata:
 
 networks:
   ser-net:

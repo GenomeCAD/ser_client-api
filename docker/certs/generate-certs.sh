@@ -18,7 +18,6 @@ cd "$(dirname "$0")"
 
 rm -f ca.key ca-cert.pem server.key server.csr server.crt client.key client.csr client-cert.pem client-key.pem
 
-# CA - basicConstraints + keyCertSign required so Python 3.10+ ssl accepts it as a CA
 openssl genrsa -out ca.key 4096
 openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 \
     -subj "/CN=ser-demo-CA/O=GenomeCAD" \
@@ -27,15 +26,12 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 \
     -addext "subjectKeyIdentifier=hash" \
     -out ca-cert.pem
 
-# Server cert - CN=proftpd is mandatory: ser_client-ftps uses check_hostname=True
 openssl genrsa -out server.key 2048
 openssl req -new -key server.key -subj "/CN=proftpd/O=GenomeCAD" -out server.csr
 openssl x509 -req -in server.csr -CA ca-cert.pem -CAkey ca.key \
     -CAcreateserial -out server.crt -days 3650 -sha256 \
     -extfile <(printf "subjectAltName=DNS:proftpd,DNS:localhost\nextendedKeyUsage=serverAuth\nbasicConstraints=CA:FALSE")
 
-# Client cert - O=CHU-TEST is mandatory: ProFTPD maps TLSUserName "2.5.4.10" (organizationName)
-# to the FTP username, so the O= field must equal the FTP account name.
 openssl genrsa -out client-key.pem 2048
 openssl req -new -key client-key.pem -subj "/CN=ser-demo-client/O=CHU-TEST" -out client.csr
 openssl x509 -req -in client.csr -CA ca-cert.pem -CAkey ca.key \

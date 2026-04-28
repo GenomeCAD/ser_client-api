@@ -23,22 +23,7 @@
 #   (and remove --allow-root from CMD)
 FROM python:3.12-slim
 
-# =============================================================================
-# Layer 2 - Jupyter runtime
-# =============================================================================
 RUN pip install --no-cache-dir jupyterlab
-
-# =============================================================================
-# Layer 3 - Application libraries (ser_client-ftps, then ser_client-api)
-# =============================================================================
-# Build context is the PycharmProjects root (context: ../.. in docker-compose.yml),
-# so both library directories are accessible as siblings.
-#
-# To build a registry-publishable image independently of the local checkout,
-# replace the two COPY+RUN blocks below with:
-#   RUN pip install --no-cache-dir \
-#       git+https://github.com/GenomeCAD/ser_client-ftps.git@v0.3.0 \
-#       git+https://github.com/GenomeCAD/ser_client-api.git@v0.5.0
 
 COPY ser_client-ftps/ ./ser_client-ftps/
 RUN pip install --no-cache-dir ./ser_client-ftps
@@ -48,6 +33,4 @@ RUN pip install --no-cache-dir ./ser-client-api
 
 EXPOSE 8888
 
-# Token is injected at runtime via JUPYTER_TOKEN env var (set in docker-compose.yml).
-# Do not expose this service to untrusted networks - no mTLS on the Jupyter port.
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
