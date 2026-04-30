@@ -7,3 +7,7 @@ build/
 *.egg-info/
 .eggs/
 docs/domain-model-fhir-alignment.md
+docker/seqoia/*
+!docker/seqoia/.gitkeep
+docker/inbox/
+docker/results/

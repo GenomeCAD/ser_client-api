@@ -1,0 +1,244 @@
+name: ser-demo
+
+# Usage:
+#   bash certs/generate-certs.sh        # one-time: generate dev TLS certificates
+#   docker compose build                # build images
+#   docker compose up                   # start the full stack
+#   docker compose --profile dev up     # also start Jupyter
+#
+# To process a prescription:
+#   cp your-prescription.json docker/seqoia/
+#   The poller picks it up automatically and dispatches to Celery workers.
+#   Results (HL7v2 + SHA-256 sidecars) appear in docker/seqoia/<report_id>/
+#
+# To scale workers horizontally:
+#   docker compose up --scale worker=3
+#
+# Admin UIs:
+#   http://localhost:15673   RabbitMQ management (user/password)
+#   http://localhost:5555    Flower - Celery worker monitor
+#   http://localhost:8888    Jupyter (--profile dev only, token: ser-demo)
+
+services:
+
+  rabbitmq-client:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "15673:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ser-net]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks: [ser-net]
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+
+  poller:
+    build:
+      context: ../..
+      dockerfile: ser-client-api/docker/worker/Dockerfile
+    image: ser-demo-worker:0.7.0
+    command: ["python", "poller.py"]
+    environment:
+      BROKER_URL: amqp://user:password@rabbitmq-client:5672//
+      BACKEND_URL: redis://redis:6379/0
+      INBOX_DIR: /data/seqoia
+      RESULTS_DIR: /data/seqoia
+      POLL_INTERVAL: "5"
+    volumes:
+      - ./seqoia:/data/seqoia
+    networks: [ser-net]
+    depends_on:
+      rabbitmq-client:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: ser-client-api/docker/worker/Dockerfile
+    image: ser-demo-worker:0.7.0
+    environment:
+      BROKER_URL: amqp://user:password@rabbitmq-client:5672//
+      BACKEND_URL: redis://redis:6379/0
+    volumes:
+      - ./seqoia:/data/seqoia
+    networks: [ser-net]
+    depends_on:
+      rabbitmq-client:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+
+  flower:
+    image: mher/flower
+    command: ["celery", "--broker=amqp://user:password@rabbitmq-client:5672//", "flower", "--port=5555"]
+    environment:
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      FLOWER_UNAUTHENTICATED_API: "true"
+    ports:
+      - "5555:5555"
+    networks: [ser-net]
+    depends_on:
+      rabbitmq-client:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  proftpd:
+    build:
+      context: ../../ser_server-ftps/proftpd-ftps
+    image: ser-demo-proftpd:latest
+    volumes:
+      - ./certs/ca-cert.pem:/etc/proftpd/ssl/cacert.pem:ro
+      - ./certs/server.crt:/etc/proftpd/ssl/proftpd.crt:ro
+      - ./certs/server.key:/etc/proftpd/ssl/proftpd.key:ro
+      - ./proftpd/proftpd.conf:/etc/proftpd/proftpd.conf:ro
+      - ftpdata:/home/CHU-TEST
+    ports:
+      - "9990:990"
+      - "39000-39009:30000-30009"
+    networks: [ser-net]
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  appserver:
+    build:
+      context: ../../ser_server-ftps/appserver
+    image: ser-demo-appserver:latest
+    entrypoint: ["/bin/bash", "-c", "mkdir -p /tasks/remote && chmod 777 /tasks/remote && exec /run/entrypoint.sh"]
+    environment:
+      RMQ_HOST: rabbitmq
+      RMQ_USER: user
+      RMQ_PASS: password
+      RMQ_QUEUE: chu_files
+    volumes:
+      - ftpdata:/tasks
+    networks: [ser-net]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ser-net]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  jupyter:
+    build:
+      context: ../..
+      dockerfile: ser-client-api/docker/jupyter/Dockerfile
+    image: ser-demo-jupyter:0.7.0
+    profiles: [dev]
+    ports:
+      - "8888:8888"
+    environment:
+      JUPYTER_TOKEN: ser-demo
+      FTPS_HOST: ${FTPS_HOST}
+      FTPS_PORT: "${FTPS_PORT}"
+      FTPS_USER: ${FTPS_USER}
+      FTPS_PASSWORD: ${FTPS_PASSWORD}
+      REMOTE_PATH: ${REMOTE_PATH}
+      CERT_DIR: ${CERT_DIR}
+    volumes:
+      - ./certs:/certs:ro
+      - ../docs:/home/jovyan/work
+    networks: [ser-net]
+    depends_on:
+      - proftpd
+      - appserver
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # TODO
+  # audit-db:
+  #   image: postgres:17
+  #   environment:
+  #     POSTGRES_USER: audit
+  #     POSTGRES_PASSWORD: password
+  #   volumes:
+  #     - auditdata:/var/lib/postgresql/data
+  #   networks: [ser-net]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 512M
+  #         cpus: '0.5'
+
+volumes:
+  ftpdata:
+  # auditdata:
+
+networks:
+  ser-net:
+    driver: bridge
