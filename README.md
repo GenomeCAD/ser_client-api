@@ -129,6 +129,114 @@ On first use, two models are downloaded from HuggingFace and cached locally (~60
 
 If `[ml]` is not installed, the SeqOIA parser silently falls back to `EXT` for unresolved labels - no exception is raised.
 
+## Docker demo environment
+
+`docker/` contains a self-contained Compose stack for running and demonstrating the prescription processing pipeline locally — no GIP-CAD infrastructure required. It supports two independent demo flows:
+
+**Automated processing flow** — drop a JSON prescription into a watched directory; the Celery worker picks it up, generates the HL7v2 message and SHA-256 sidecars, and publishes an audit event. This flow demonstrates automated prescription handling.
+
+**Interactive FTPS flow** — a JupyterLab notebook (`docs/ser_demo_notebook.ipynb`, served by the `jupyter` dev service) walks through the full client-side exchange step by step: parse, generate HL7v2, transfer files to the mock FTPS server via `ser_client-ftps`, and pull back and parse the ACK response. This flow demonstrates the complete transfer handshake with `ser_server-ftps`.
+
+The two flows are independent: the worker does not perform FTPS transfers, and the notebook does not go through Celery.
+
+### Architecture
+
+| Service | Flow | Role |
+|---|---|---|
+| `rabbitmq-client` | automated | RabbitMQ broker for Celery tasks and audit events (management UI on port 15673) |
+| `redis` | automated | Celery result backend |
+| `poller` | automated | Watches `docker/seqoia/` for new `.json` files and dispatches a Celery task for each |
+| `worker` | automated | Celery worker — parses the prescription, generates HL7v2 + SHA-256 sidecars, publishes an audit event |
+| `flower` | automated | Celery task monitor (port 5555) |
+| `proftpd` | FTPS | Mock FTPS server (port 9990) |
+| `appserver` | FTPS | ser_server-ftps application server — processes received HL7v2 and writes ACK responses |
+| `rabbitmq` | FTPS | Dedicated RabbitMQ instance for ser_server-ftps |
+| `jupyter` _(dev profile)_ | FTPS | JupyterLab serving the interactive FTPS demo notebook (port 8888) |
+
+### Prerequisites
+
+- Docker with the Compose plugin
+- Generated dev TLS certificates (one-time):
+
+```bash
+bash docker/certs/generate-certs.sh
+```
+
+### Starting the stack
+
+```bash
+docker compose -f docker/docker-compose.yml build
+docker compose -f docker/docker-compose.yml up
+```
+
+To also start JupyterLab for the interactive FTPS demo:
+
+```bash
+docker compose -f docker/docker-compose.yml --profile dev up
+```
+
+Open http://localhost:8888 (token: `ser-demo`) and run `docs/ser_demo_notebook.ipynb`.
+
+### Processing a prescription
+
+Copy any SeqOIA prescription JSON into the inbox directory:
+
+```bash
+cp your-prescription.json docker/seqoia/
+```
+
+The poller picks it up within 5 seconds. The worker writes results to `docker/seqoia/<report_id>/`:
+
+```
+docker/seqoia/<report_id>/
+    <report_id>.hl7          # sealed HL7v2 ORU_R01 message
+    <report_id>/             # per-individual subdirectories
+        <file>.sha256        # SHA-256 sidecar for each genomic file
+```
+
+Processing is idempotent: if `<report_id>.hl7` already exists the task is skipped.
+
+To scale workers horizontally:
+
+```bash
+docker compose -f docker/docker-compose.yml up --scale worker=3
+```
+
+### Admin UIs
+
+| URL | Service | Credentials |
+|---|---|---|
+| http://localhost:15673 | RabbitMQ management | `user` / `password` |
+| http://localhost:5555 | Flower (Celery monitor) | none |
+| http://localhost:8888 | JupyterLab (dev profile) | token: `ser-demo` |
+
+### Audit events
+
+The worker publishes a FHIR R4 `AuditEvent` to the `ser.audit` fanout exchange on `rabbitmq-client` at every processing outcome:
+
+| HTTP code | Meaning |
+|---|---|
+| `201 Created` | Prescription processed successfully |
+| `208 Already Reported` | Skipped — output already exists |
+| `500 Internal Server Error` | Failed after all retries exhausted |
+
+Events accumulate in the durable `ser_audit` queue and are visible in the RabbitMQ management UI. A database consumer (`audit-db`) is not yet wired — see the commented-out `audit-db` service in `docker-compose.yml`.
+
+### FTPS configuration
+
+Jupyter and the FTPS-related services read their connection parameters from `docker/.env`:
+
+```
+FTPS_HOST=proftpd
+FTPS_PORT=990
+FTPS_USER=CHU-TEST
+FTPS_PASSWORD=ftppassword
+REMOTE_PATH=remote/seqoia
+CERT_DIR=/certs
+```
+
+Edit this file to point at a real FTPS endpoint without touching `docker-compose.yml`.
+
 ## Development
 
 ### Setup
