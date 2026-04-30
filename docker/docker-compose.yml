@@ -198,12 +198,12 @@ services:
       - "8888:8888"
     environment:
       JUPYTER_TOKEN: ser-demo
-      FTPS_HOST: proftpd
-      FTPS_PORT: "990"
-      FTPS_USER: CHU-TEST
-      FTPS_PASSWORD: ftppassword
-      REMOTE_PATH: remote/seqoia
-      CERT_DIR: /certs
+      FTPS_HOST: ${FTPS_HOST}
+      FTPS_PORT: "${FTPS_PORT}"
+      FTPS_USER: ${FTPS_USER}
+      FTPS_PASSWORD: ${FTPS_PASSWORD}
+      REMOTE_PATH: ${REMOTE_PATH}
+      CERT_DIR: ${CERT_DIR}
     volumes:
       - ./certs:/certs:ro
       - ../docs:/home/jovyan/work
