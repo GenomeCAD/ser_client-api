@@ -3,6 +3,7 @@ import json
 import logging
 from pathlib import Path
 
+import audit
 from celery_app import app
 
 from ser_client_api.demo.helpers import get_composition, populate_temporary_presc_dir
@@ -26,14 +27,14 @@ def process_prescription(self, json_path: str, results_dir: str) -> dict:
         presc_dir = results / composition.report_id
         if (presc_dir / f"{composition.report_id}.hl7").exists():
             logger.info("Skipping %s - already processed", composition.report_id)
+            audit.emit(composition.report_id, "process", "informational", "208", "Already Reported")
             return {"report_id": composition.report_id, "status": "skipped"}
 
         populate_temporary_presc_dir(presc_dir, composition.report_id, composition)
-
         _generator.generate_and_seal(composition, presc_dir, composition.report_id)
-
         n_sidecars = generate_sidecars(presc_dir)
 
+        audit.emit(composition.report_id, "process", "informational", "201", "Created")
         logger.info("Processed %s: %d sidecar(s) written", composition.report_id, n_sidecars)
         return {
             "report_id": composition.report_id,
@@ -41,4 +42,6 @@ def process_prescription(self, json_path: str, results_dir: str) -> dict:
             "presc_dir": str(presc_dir),
         }
     except Exception as exc:
+        if self.request.retries >= self.max_retries:
+            audit.emit(json_file.stem, "process", "error", "500", "Internal Server Error")
         raise self.retry(exc=exc)
