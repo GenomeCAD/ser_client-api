@@ -131,11 +131,11 @@ If `[ml]` is not installed, the SeqOIA parser silently falls back to `EXT` for u
 
 ## Docker demo environment
 
-`docker/` contains a self-contained Compose stack for running and demonstrating the prescription processing pipeline locally — no GIP-CAD infrastructure required. It supports two independent demo flows:
+`docker/` contains a self-contained Compose stack for running and demonstrating the prescription processing pipeline locally - no GIP-CAD infrastructure required. It supports two independent demo flows:
 
-**Automated processing flow** — drop a JSON prescription into a watched directory; the Celery worker picks it up, generates the HL7v2 message and SHA-256 sidecars, and publishes an audit event. This flow demonstrates automated prescription handling.
+**Automated processing flow** - drop a JSON prescription into a watched directory; the Celery worker picks it up, generates the HL7v2 message and SHA-256 sidecars, and publishes an audit event. This flow demonstrates automated prescription handling.
 
-**Interactive FTPS flow** — a JupyterLab notebook (`docs/ser_demo_notebook.ipynb`, served by the `jupyter` dev service) walks through the full client-side exchange step by step: parse, generate HL7v2, transfer files to the mock FTPS server via `ser_client-ftps`, and pull back and parse the ACK response. This flow demonstrates the complete transfer handshake with `ser_server-ftps`.
+**Interactive FTPS flow** - a JupyterLab notebook (`docs/ser_demo_notebook.ipynb`, served by the `jupyter` dev service) walks through the full client-side exchange step by step: parse, generate HL7v2, transfer files to the mock FTPS server via `ser_client-ftps`, and pull back and parse the ACK response. This flow demonstrates the complete transfer handshake with `ser_server-ftps`.
 
 The two flows are independent: the worker does not perform FTPS transfers, and the notebook does not go through Celery.
 
@@ -146,10 +146,10 @@ The two flows are independent: the worker does not perform FTPS transfers, and t
 | `rabbitmq-client` | automated | RabbitMQ broker for Celery tasks and audit events (management UI on port 15673) |
 | `redis` | automated | Celery result backend |
 | `poller` | automated | Watches `docker/seqoia/` for new `.json` files and dispatches a Celery task for each |
-| `worker` | automated | Celery worker — parses the prescription, generates HL7v2 + SHA-256 sidecars, publishes an audit event |
+| `worker` | automated | Celery worker - parses the prescription, generates HL7v2 + SHA-256 sidecars, publishes an audit event |
 | `flower` | automated | Celery task monitor (port 5555) |
 | `proftpd` | FTPS | Mock FTPS server (port 9990) |
-| `appserver` | FTPS | ser_server-ftps application server — processes received HL7v2 and writes ACK responses |
+| `appserver` | FTPS | ser_server-ftps application server - processes received HL7v2 and writes ACK responses |
 | `rabbitmq` | FTPS | Dedicated RabbitMQ instance for ser_server-ftps |
 | `jupyter` _(dev profile)_ | FTPS | JupyterLab serving the interactive FTPS demo notebook (port 8888) |
 
@@ -217,10 +217,10 @@ The worker publishes a FHIR R4 `AuditEvent` to the `ser.audit` fanout exchange o
 | HTTP code | Meaning |
 |---|---|
 | `201 Created` | Prescription processed successfully |
-| `208 Already Reported` | Skipped — output already exists |
+| `208 Already Reported` | Skipped - output already exists |
 | `500 Internal Server Error` | Failed after all retries exhausted |
 
-Events accumulate in the durable `ser_audit` queue and are visible in the RabbitMQ management UI. A database consumer (`audit-db`) is not yet wired — see the commented-out `audit-db` service in `docker-compose.yml`.
+Events accumulate in the durable `ser_audit` queue and are visible in the RabbitMQ management UI. A database consumer (`audit-db`) is not yet wired - see the commented-out `audit-db` service in `docker-compose.yml`.
 
 ### FTPS configuration
 
